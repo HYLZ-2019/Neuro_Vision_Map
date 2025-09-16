@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The Neuromorphic Vision World - Geographic Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+    <link rel="stylesheet" type="text/css" href="../map_style.css">
+</head>
+<body>
+    <!-- 地图容器 -->
+    <div id="map-container"></div>
+    
+    <!-- 控制面板 -->
+    <div id="controlPanel">
+        <div class="panel-header" onclick="togglePanel()">
+            <span class="panel-title">Control Panel</span>
+            <div class="header-buttons">
+                <button class="header-btn" id="infoBtn" onclick="showInfoModal(event)" title="View details and data sources">ℹ️</button>
+                <button class="header-btn" id="langBtn" onclick="toggleLanguage(event)" title="Toggle Chinese/English Display">🌐</button>
+                <button class="collapse-button" id="collapseBtn">▲</button>
+            </div>
+        </div>
+        
+        <div class="panel-content" id="panelContent">
+            <div class="filter-group">
+                <div class="year-header">
+                    <label class="filter-label">Year Selection</label>
+                    <button class="play-button" id="playButton" onclick="toggleYearPlayback()">▶ Play</button>
+                </div>
+                <div class="year-selector" id="yearSelector">
+                    <!-- 年份选项将在这里动态生成 -->
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Conference Filter</label>
+                <div class="conf-controls">
+                    <button class="conf-control-btn" onclick="selectAllConfs()">Select All</button>
+                    <button class="conf-control-btn" onclick="clearAllConfs()">Clear All</button>
+                    <button class="conf-control-btn" onclick="selectTopConfs()">Main Conferences</button>
+                </div>
+                <div class="conf-selector">
+                    <div class="conf-grid" id="confFilters">
+                        <!-- 会议选项将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Min Collaborations</label>
+                <input type="range" id="minCollabSlider" class="filter-input" min="1" max="10" value="1">
+                <span id="minCollabDisplay">1</span>
+            </div>
+            
+            <div class="filter-group">
+                <label class="filter-label">Display Options</label>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="showLabels">
+                    <label>Show Institution Labels</label>
+                </div>
+                <div class="filter-checkbox">
+                    <input type="checkbox" id="showCollaborations" checked>
+                    <label>Show Collaborations</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 详情面板 -->
+    <div id="detailPanel">
+        <div class="detail-header">
+            <span class="detail-title" id="detailTitle" data-zh="机构详情" data-en="Institution Details">Institution Details</span>
+            <button class="close-button" id="closeDetailButton">×</button>
+        </div>
+        <div id="detailContent">
+            <!-- 详情内容将在这里动态加载 -->
+        </div>
+    </div>
+    
+    <!-- 信息模态框 -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" data-zh="详情说明和数据来源" data-en="Details and Data Sources">Details and Data Sources</span>
+                <button class="close-button" onclick="closeInfoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-section">
+                    <h3 data-zh="项目简介" data-en="Project Overview">Project Overview</h3>
+                    <p data-zh="本项目可视化地展现了从事神经形态视觉研究的机构之间的合作关系。" data-en="This project visualizes the collaborative relationships between institutions engaged in neuromorphic vision research.">
+                        This project visualizes the collaborative relationships between institutions engaged in neuromorphic vision research.
+                    </p>
+                </div>
+                
+                <div class="info-section">
+                    <h3 data-zh="数据来源" data-en="Data Sources">数据来源与说明</h3>
+                    <p data-zh="本项目使用的论文列表来源于互联网（https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8/edit?gid=0#gid=0），截止日期为2025年8月19日。基于该列表中的论文标题与会议/期刊信息，我基于arXiv与semantic scholar的API对它们的作者列表用智能体进行了查询。对于在arXiv上的论文，我让智能体对其首页上的机构信息进行了提取与清洗，并手动完成了一些额外的清洗工作。" data-en="The paper list used in this project is sourced from the internet (https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8/edit?gid=0#gid=0), with a cutoff date of August 19, 2025. Based on the paper titles and conference/journal information in the list, I used AI agents to query their author lists through arXiv and semantic scholar APIs. For papers on arXiv, I had the AI agent extract and clean the institutional information from their front pages, and manually completed some additional cleaning work.">
+                        本项目使用的论文列表来源于互联网（https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8/edit?gid=0#gid=0），截止日期为2025年8月19日。基于该列表中的论文标题与会议/期刊信息，我基于arXiv与semantic scholar的API对它们的作者列表用智能体进行了查询。对于在arXiv上的论文，我让智能体对其首页上的机构信息进行了提取与清洗，并手动完成了一些额外的清洗工作。
+                    </p>
+                    <p data-zh="由于能力有限，很多论文的信息并未得到成功提取，很多作者的机构也没有得到标注（我归为'unknown'），请见谅。" data-en="Due to limited capabilities, information for many papers was not successfully extracted, and many authors' institutions were not annotated (I categorized them as 'unknown'). Please understand.">
+                        由于能力有限，很多论文的信息并未得到成功提取，很多作者的机构也没有得到标注（我归为"unknown"），请见谅。
+                    </p>
+                    <p data-zh="用于可视化机构位置的地理坐标由大语言模型给出。为了便于可视化，我用一个简单的算法把过于密集的点散开。因此，地图上的位置并不精确，只能提供一个感性的认识。" data-en="The geographic coordinates used to visualize institutional locations are provided by large language models. To facilitate visualization, I used a simple algorithm to spread out overly dense points. Therefore, the positions on the map are not precise and can only provide an intuitive understanding.">
+                        用于可视化机构位置的地理坐标由大语言模型给出。为了便于可视化，我用一个简单的算法把过于密集的点散开。因此，地图上的位置并不精确，只能提供一个感性的认识。
+                    </p>
+                    <p data-zh="可视化网页的代码主要由基于Claude 4的copilot编写，我指导它进行了若干次的迭代。" data-en="The visualization webpage code was mainly written by copilot based on Claude 4, with my guidance through several iterations.">
+                        可视化网页的代码主要由基于Claude 4的copilot编写，我指导它进行了若干次的迭代。
+                    </p>
+                    <p data-zh="感谢所有神经形态视觉从业者的付出。希望我们能一同携手，让行业蓬勃发展，让世界越来越好！" data-en="Thank you to all neuromorphic vision practitioners for their contributions. I hope we can work together to make the industry flourish and make the world better!">
+                        感谢所有神经形态视觉从业者的付出。希望我们能一同携手，让行业蓬勃发展，让世界越来越好！
+                    </p>
+                    <p data-zh="——HYLZ (https://github.com/HYLZ-2019)" data-en="——HYLZ (https://github.com/HYLZ-2019)">
+                        ——HYLZ (https://github.com/HYLZ-2019)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 图例 -->
+    <div id="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ff6b6b;"></div>
+            <span>Institution Location</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #888888;"></div>
+            <span>Unknown Location</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line" style="background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.8));"></div>
+            <span>Collaboration</span>
+        </div>
+    </div>
+
+<script>
+// 原始数据解析和预处理
+const paper_info_list = [[INJECT_PAPER_INFO_LIST_HERE]];
+// A list, each item in paper_info_list is: [title, year(2025), source(CVPR), [list of related institutes]]
+    
+const authors_of_institute = [[INJECT_AUTHORS_OF_INSTITUTE_HERE]];
+// A dict, each key is an institute name, value is a list of authors affiliated with it
+
+const institute_info = [[INJECT_INSTITUTE_INFO_HERE]];
+// Each key is an institute name, value is an object with lat, lon, country
+
+const research_groups = [[INJECT_RESEARCH_GROUPS_HERE]];
+
+
+// 全局变量
+let allPapers = [];
+let availableYears = new Set();
+let availableConfs = new Set();
+let svg, g, projection, path;
+let instituteStats = {};
+let collaborationStats = {};
+
+// 从新数据格式构建所需的数据结构
+let authorToInstitute = {};
+
+// 初始化数据
+function initializeData() {
+    console.log("开始初始化数据...");
+    console.log("paper_info_list length:", paper_info_list.length);
+    console.log("authors_of_institute:", authors_of_institute);
+    console.log("institute_info:", institute_info);
+    
+    // 构建作者到机构的映射
+    for (const [instituteName, authorList] of Object.entries(authors_of_institute)) {
+        for (const author of authorList) {
+            authorToInstitute[author] = instituteName;
+        }
+    }
+    
+    // 处理论文数据，从 paper_info_list 构建 allPapers
+    paper_info_list.forEach(paperEntry => {
+        const [title, year, source, relatedInstitutes] = paperEntry;
+        
+        const paperObj = {
+            title: title,
+            year: year,
+            conf: source,
+            institutes: relatedInstitutes
+        };
+        
+        allPapers.push(paperObj);
+        availableYears.add(year);
+        availableConfs.add(source);
+    });
+    
+}
+
+// 颜色生成函数
+function getColor(str) {
+    if (str === 'unknown' || str === 'Unknown') {
+        return '#666666';
+    }
+    
+    if (str.includes('Peking University')) {
+        return '#c8102e';
+    }
+    if (str.includes('Tsinghua University')) {
+        return '#4B0082';
+    }
+
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    
+    const hue = Math.abs(hash) % 360;
+    const saturation = 60 + (Math.abs(hash) % 40);
+    const lightness = 50 + (Math.abs(hash) % 30);
+    
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
+// 获取机构位置
+function getInstituteLocation(instituteName) {
+    if (institute_info[instituteName]) {
+        return institute_info[instituteName];
+    }
+    
+    // 返回默认位置 (经纬度为0)
+    return { lat: 0, lon: 0, country: "unknown" };
+}
+
+// 计算统计数据
+function computeStats(filteredPapers) {
+    instituteStats = {};
+    collaborationStats = {};
+    
+    // 统计所有机构（包括未知位置的机构）
+    filteredPapers.forEach(entry => {
+        const institutes = entry.institutes || []; // 使用论文直接关联的机构列表
+        const knownInstitutions = new Set();
+        
+        institutes.forEach(institute => {
+            if (!instituteStats[institute]) {
+                instituteStats[institute] = {
+                    papers: 0,
+                    authors: new Set(),
+                    collaborations: {}
+                };
+            }
+            
+            instituteStats[institute].papers++;
+            
+            // 添加该机构的作者（如果有的话）
+            if (authors_of_institute[institute]) {
+                authors_of_institute[institute].forEach(author => {
+                    instituteStats[institute].authors.add(author);
+                });
+            }
+            
+            // 只有已知位置的机构才参与合作统计
+            const location = getInstituteLocation(institute);
+            if (location && !(location.lat === 0 && location.lon === 0) && location.country !== "Unknown") {
+                knownInstitutions.add(institute);
+            }
+        });
+        
+        // 统计已知位置机构间的合作（排除未知位置机构）
+        const knownInstituteArray = Array.from(knownInstitutions);
+        for (let i = 0; i < knownInstituteArray.length; i++) {
+            for (let j = i + 1; j < knownInstituteArray.length; j++) {
+                const inst1 = knownInstituteArray[i];
+                const inst2 = knownInstituteArray[j];
+                
+                const pair = [inst1, inst2].sort().join('|');
+                
+                if (!collaborationStats[pair]) {
+                    collaborationStats[pair] = 0;
+                }
+                collaborationStats[pair]++;
+                
+                if (!instituteStats[inst1].collaborations[inst2]) {
+                    instituteStats[inst1].collaborations[inst2] = 0;
+                }
+                if (!instituteStats[inst2].collaborations[inst1]) {
+                    instituteStats[inst2].collaborations[inst1] = 0;
+                }
+                
+                instituteStats[inst1].collaborations[inst2]++;
+                instituteStats[inst2].collaborations[inst1]++;
+            }
+        }
+    });
+    
+    // 转换作者集合为数量
+    Object.keys(instituteStats).forEach(institute => {
+        instituteStats[institute].authorCount = instituteStats[institute].authors.size;
+    });
+}
+
+// 初始化地图
+async function initializeMap() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    svg = d3.select("#map-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+    
+    g = svg.append("g");
+    
+    // 设置地图投影 - 增大缩放倍数
+    projection = d3.geoNaturalEarth1()
+        .scale(300)  // 从180增加到300
+        .translate([width / 2, height / 2]);
+    
+    path = d3.geoPath().projection(projection);
+    
+    // 加载世界地图数据
+    try {
+        const world = await d3.json("https://unpkg.com/world-atlas@2/countries-110m.json");
+        const countries = topojson.feature(world, world.objects.countries);
+        
+        // 绘制国家边界
+        g.selectAll(".country")
+            .data(countries.features)
+            .enter().append("path")
+            .attr("class", "countries")
+            .attr("d", path);
+            
+    } catch (error) {
+        console.warn("无法加载世界地图数据，使用简化版本");
+        // 如果无法加载地图数据，创建一个简单的背景
+        g.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "#2a2a2a")
+            .attr("stroke", "#404040");
+    }
+    
+    // 添加缩放和拖拽功能 - 调整缩放范围，并在缩放时保持圆点大小
+    const zoom = d3.zoom()
+        .scaleExtent([0.3, 10])  // 允许更大的缩放范围
+        .on("zoom", (event) => {
+            g.attr("transform", event.transform);
+            
+            // 调整圆点大小以亚线性增长（点相对于地图越来越小）
+            const scale = event.transform.k;
+            g.selectAll(".institute-dot, .unknown-location-dot")
+                .attr("r", function() {
+                    const baseRadius = parseFloat(d3.select(this).attr("data-base-r"));
+                    // 使用对数函数实现亚线性增长：点相对于地图会越来越小
+                    // 当scale=1时，scaleFactor=1；当scale=4时，scaleFactor约为1.39；当scale=16时，scaleFactor=2
+                    const scaleFactor = Math.sqrt(scale)
+                    return baseRadius / scaleFactor;
+                });
+            
+            // 调整连线宽度 - 亚线性增长
+            g.selectAll(".collaboration-line")
+                .attr("stroke-width", function() {
+                    const baseWidth = parseFloat(d3.select(this).attr("data-base-width"));
+                    const scaleFactor = Math.sqrt(scale);
+                    return baseWidth / scaleFactor;
+                });
+            
+            // 调整标签大小 - 亚线性增长
+            g.selectAll(".institute-label, .hover-label")
+                .style("font-size", function() {
+                    const scaleFactor = Math.sqrt(scale);
+                    return (12 / scaleFactor) + "px";
+                });
+            
+            // 调整水印大小 - 亚线性增长
+            g.selectAll(".watermark")
+                .style("font-size", function() {
+                    const scaleFactor = Math.sqrt(scale);
+                    return (14 / scaleFactor) + "px";
+                });
+        });
+    
+    svg.call(zoom);
+    
+    // 添加水印 - 在好望角下方的海域
+    const watermarkLat = -42;
+    const watermarkLon = 22;
+    const [watermarkX, watermarkY] = projection([watermarkLon, watermarkLat]);
+    
+    if (!isNaN(watermarkX) && !isNaN(watermarkY)) {
+        g.append("text")
+            .attr("class", "watermark")
+            .attr("x", watermarkX)
+            .attr("y", watermarkY)
+            .text("https://github.com/HYLZ-2019/Neuro_Vision_Map")
+            .style("font-size", "14px")
+            .style("fill", "rgba(255, 255, 255, 0.3)")
+            .style("font-family", "Arial, sans-serif")
+            .style("text-anchor", "middle")
+            .style("pointer-events", "none")
+            .style("user-select", "none")
+            .style("text-shadow", "1px 1px 2px rgba(0, 0, 0, 0.5)");
+    }
+}
+
+// 更新地图可视化
+function updateMapVisualization() {
+    const filteredPapers = getFilteredPapers();
+    computeStats(filteredPapers);
+    
+    const minCollabThreshold = parseInt(document.getElementById('minCollabSlider').value);
+    const showLabels = document.getElementById('showLabels').checked;
+    const showCollaborations = document.getElementById('showCollaborations').checked;
+    
+    // 分离已知位置和未知位置的机构
+    const knownInstitutes = [];
+    const unknownInstitutes = [];
+    
+    Object.keys(instituteStats).forEach(institute => {
+        const location = getInstituteLocation(institute);
+        const stats = instituteStats[institute];
+        
+        if (!location || (location.lat === 0 && location.lon === 0) || location.country === "unknown") {
+            // 未知位置的机构
+            unknownInstitutes.push({
+                name: institute,
+                papers: stats.papers,
+                authors: stats.authorCount,
+                location: location
+            });
+        } else {
+            // 已知位置的机构
+            const [x, y] = projection([location.lon, location.lat]);
+            knownInstitutes.push({
+                name: institute,
+                x: x,
+                y: y,
+                papers: stats.papers,
+                authors: stats.authorCount,
+                location: location
+            });
+        }
+    });
+    
+    // 过滤掉无效坐标的已知机构
+    const validKnownInstitutes = knownInstitutes.filter(d => !isNaN(d.x) && !isNaN(d.y));
+    
+    // 调整重叠位置
+    adjustOverlappingPositions(validKnownInstitutes);
+    
+    // 计算合作连线数据（只包含已知位置机构间的合作）
+    const collaborations = Object.entries(collaborationStats)
+        .filter(([pair, count]) => count >= minCollabThreshold)
+        .map(([pair, count]) => {
+            const [inst1, inst2] = pair.split('|');
+            
+            // 从调整后的institutes数组中找到对应的位置
+            const institute1 = validKnownInstitutes.find(inst => inst.name === inst1);
+            const institute2 = validKnownInstitutes.find(inst => inst.name === inst2);
+            
+            if (!institute1 || !institute2) {
+                return null;
+            }
+            
+            return {
+                source: {name: inst1, x: institute1.x, y: institute1.y},
+                target: {name: inst2, x: institute2.x, y: institute2.y},
+                count: count
+            };
+        })
+        .filter(d => d !== null);
+    
+    // 移除旧的可视化元素
+    g.selectAll(".collaboration-line").remove();
+    g.selectAll(".institute-dot").remove();
+    g.selectAll(".institute-label").remove();
+    g.selectAll(".unknown-location-dot").remove();
+    
+    // 绘制合作连线
+    if (showCollaborations) {
+        const maxCollabCount = d3.max(collaborations, d => d.count) || 1;
+        
+        g.selectAll(".collaboration-line")
+            .data(collaborations)
+            .enter().append("line")
+            .attr("class", "collaboration-line")
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y)
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", d => Math.sqrt(d.count / maxCollabCount) * 1.5 + 0.3)
+            .attr("stroke-opacity", d => 0.05 + (d.count / maxCollabCount) * 0.1)
+            .attr("data-source", d => d.source.name)
+            .attr("data-target", d => d.target.name)
+            .attr("data-base-width", d => Math.sqrt(d.count / maxCollabCount) * 1.5 + 0.3)
+            .attr("vector-effect", "non-scaling-stroke")
+            .datum(d => d);
+    }
+    
+    // 绘制已知位置的机构圆点
+    const maxPapers = d3.max(validKnownInstitutes, d => d.papers) || 1;
+    
+    const dots = g.selectAll(".institute-dot")
+        .data(validKnownInstitutes)
+        .enter().append("circle")
+        .attr("class", "institute-dot")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", d => {
+            const radius = Math.sqrt(d.papers / maxPapers) * 6 + 2;
+            return radius;
+        })
+        .attr("data-base-r", d => Math.sqrt(d.papers / maxPapers) * 6 + 2)
+        .attr("fill", d => getColor(d.name))
+        .attr("vector-effect", "non-scaling-stroke")
+        .on("click", function(event, d) {
+            g.selectAll(".institute-dot, .unknown-location-dot").classed("clicked", false);
+            d3.select(this).classed("clicked", true);
+            
+            showInstituteDetails(d);
+            highlightCollaborations(d.name);
+        })
+        .on("mouseover", function(event, d) {
+            highlightCollaborations(d.name);
+            showInstituteLabel(d);
+        })
+        .on("mouseout", function(event, d) {
+            resetHighlight();
+            hideInstituteLabel();
+        });
+    
+    // 绘制未知位置的汇总点（在地图左下方）
+    if (unknownInstitutes.length > 0) {
+        // 获取地图视窗尺寸，将unknown点放在左下角
+        const mapWidth = svg.attr("width");
+        const mapHeight = svg.attr("height");
+        const unknownX = 50; // 距离左边界50像素
+        const unknownY = mapHeight - 50; // 距离底边界50像素
+        const unknownRadius = 12; // 固定大小
+        const totalUnknownPapers = unknownInstitutes.reduce((sum, inst) => sum + inst.papers, 0);
+        
+        g.append("circle")
+            .attr("class", "unknown-location-dot")
+            .attr("cx", unknownX)
+            .attr("cy", unknownY)
+            .attr("r", unknownRadius)
+            .attr("data-base-r", unknownRadius)
+            .attr("fill", "#888888")
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2)
+            .attr("vector-effect", "non-scaling-stroke")
+            .style("cursor", "pointer")
+            .on("click", function(event) {
+                g.selectAll(".institute-dot, .unknown-location-dot").classed("clicked", false);
+                d3.select(this).classed("clicked", true);
+                
+                showUnknownLocationDetails(unknownInstitutes);
+            })
+            .on("mouseover", function(event) {
+                showUnknownLocationLabel(unknownInstitutes.length, totalUnknownPapers, unknownX, unknownY);
+            })
+            .on("mouseout", function(event) {
+                hideInstituteLabel();
+            });
+    }
+    
+    // 存储圆点引用以便在缩放时调整大小
+    g.property("instituteDots", dots);
+    
+    // 绘制机构标签（只显示已知位置的机构）
+    if (showLabels) {
+        g.selectAll(".institute-label")
+            .data(validKnownInstitutes.filter(d => d.papers > 1))
+            .enter().append("text")
+            .attr("class", "institute-label")
+            .attr("x", d => d.x + 12)
+            .attr("y", d => d.y + 4)
+            .style("font-size", "12px")
+            .text(d => {
+                const name = d.name.replace(/🇨🇳|🇺🇸|🇬🇧|🇩🇪|🇯🇵|🇰🇷|🇸🇬|🇭🇰|🇦🇺|🇨🇦|🇫🇮|🇧🇪|🇳🇱|🇫🇷|🇨🇭|🇮🇹|🇪🇸|🇸🇪|🇩🇰|🇵🇱|🇵🇹|🇮🇳|🇸🇦|🇦🇪|🇨🇾|🇨🇱|🇪🇺/g, '').trim();
+                return name.length > 25 ? name.substring(0, 22) + '...' : name;
+            });
+    }
+}
+
+// 高亮与指定机构相关的连线
+function highlightCollaborations(instituteName) {
+    g.selectAll(".collaboration-line")
+        .attr("stroke-opacity", function() {
+            const source = d3.select(this).attr("data-source");
+            const target = d3.select(this).attr("data-target");
+            if (source === instituteName || target === instituteName) {
+                return 1.0; // 高亮的连线设置为100%透明度
+            }
+            return 0.005; // 其他连线变得非常淡
+        })
+        .attr("stroke-width", function() {
+            const source = d3.select(this).attr("data-source");
+            const target = d3.select(this).attr("data-target");
+            const currentWidth = parseFloat(d3.select(this).attr("data-base-width"));
+            if (source === instituteName || target === instituteName) {
+                return currentWidth * 2; // 高亮连线增大粗细到2倍
+            }
+            return currentWidth * 0.5; // 其他连线变细
+        });
+}
+
+// 重置高亮状态
+function resetHighlight() {
+    // 只考虑已知位置机构间的合作关系
+    const validCollaborations = Object.entries(collaborationStats)
+        .filter(([pair, count]) => {
+            const [inst1, inst2] = pair.split('|');
+            const location1 = getInstituteLocation(inst1);
+            const location2 = getInstituteLocation(inst2);
+            
+            // 排除未知位置的机构
+            const isInst1Unknown = !location1 || (location1.lat === 0 && location1.lon === 0) || location1.country === "unknown";
+            const isInst2Unknown = !location2 || (location2.lat === 0 && location2.lon === 0) || location2.country === "unknown";
+            
+            return !isInst1Unknown && !isInst2Unknown && count >= parseInt(document.getElementById('minCollabSlider').value);
+        });
+    
+    const maxCollabCount = d3.max(validCollaborations, ([pair, count]) => count) || 1;
+    
+    g.selectAll(".collaboration-line")
+        .attr("stroke-opacity", function() {
+            const data = d3.select(this).datum();
+            return 0.05 + (data.count / maxCollabCount) * 0.1; // 恢复原始透明度
+        })
+        .attr("stroke-width", function() {
+            const data = d3.select(this).datum();
+            return Math.sqrt(data.count / maxCollabCount) * 1.5 + 0.3; // 恢复原始粗细
+        });
+}
+
+// 显示悬浮时的机构标签
+function showInstituteLabel(institute) {
+    if (!document.getElementById('showLabels').checked) {
+        // 移除现有的悬浮标签
+        g.selectAll(".hover-label").remove();
+        
+        // 获取当前缩放比例
+        const currentTransform = d3.zoomTransform(svg.node());
+        const scale = currentTransform.k;
+        const scaleFactor = Math.sqrt(scale);
+        
+        // 添加悬浮标签
+        const name = institute.name.replace(/🇨🇳|🇺🇸|🇬🇧|🇩🇪|🇯🇵|🇰🇷|🇸🇬|🇭🇰|🇦🇺|🇨🇦|🇫🇮|🇧🇪|🇳🇱|🇫🇷|🇨🇭|🇮🇹|🇪🇸|🇸🇪|🇩🇰|🇵🇱|🇵🇹|🇮🇳|🇸🇦|🇦🇪|🇨🇾|🇨🇱|🇪🇺/g, '').trim();
+        const displayName = name.length > 25 ? name.substring(0, 22) + '...' : name;
+        
+        g.append("text")
+            .attr("class", "hover-label")
+            .attr("x", institute.x + 12)
+            .attr("y", institute.y + 4)
+            .text(displayName)
+            .style("pointer-events", "none")
+            .style("font-size", (12 / scaleFactor) + "px")  // 亚线性缩放
+            .style("fill", "white")
+            .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)")
+            .style("font-weight", "500");
+    }
+}
+
+// 隐藏悬浮标签
+function hideInstituteLabel() {
+    g.selectAll(".hover-label").remove();
+}
+
+// 调整重叠位置的函数 - 基于物理模拟的迭代算法
+function adjustOverlappingPositions(institutes) {
+
+    if (institutes.length <= 1) return;
+    
+    const minDistance = 5; // 最小距离
+    const maxIterations = 100; // 最大迭代次数
+    const convergenceThreshold = 0.1; // 收敛阈值
+    const damping = 0.8; // 阻尼系数，防止震荡
+    
+    // 记录每个点的原始位置
+    const originalPositions = institutes.map(inst => ({
+        x: inst.x,
+        y: inst.y,
+        name: inst.name
+    }));
+    
+    // 初始化速度
+	const velocities = institutes.map(() => ({ 
+		vx: (Math.random() - 0.5) * 0.05, 
+		vy: (Math.random() - 0.5) * 0.05 
+	}));
+    
+    for (let iteration = 0; iteration < maxIterations; iteration++) {
+        let totalMovement = 0;
+        
+        // 计算每个点受到的合力
+        const forces = institutes.map((institute, i) => {
+            let fx = 0, fy = 0;
+            
+            // 1. 与原始位置的吸引力（回归原位的趋势）
+            const attractionStrength = 0.1; // 吸引力强度
+            const originalPos = originalPositions[i];
+            const dx_orig = originalPos.x - institute.x;
+            const dy_orig = originalPos.y - institute.y;
+            const dist_orig = Math.sqrt(dx_orig * dx_orig + dy_orig * dy_orig);
+            
+            if (dist_orig > 0) {
+                fx += attractionStrength * dx_orig;
+                fy += attractionStrength * dy_orig;
+            }
+            
+            // 2. 与其他点的排斥力
+            for (let j = 0; j < institutes.length; j++) {
+                if (i === j) continue;
+                
+                const other = institutes[j];
+                const dx = institute.x - other.x;
+                const dy = institute.y - other.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < minDistance && distance > 0) {
+                    // 斥力强度与距离成反比，距离越近斥力越强
+                    const repulsionStrength = Math.pow(minDistance / distance, 2) * 2;
+                    const unitDx = dx / distance;
+                    const unitDy = dy / distance;
+                    
+                    fx += repulsionStrength * unitDx;
+                    fy += repulsionStrength * unitDy;
+                }
+            }
+            
+            return { fx, fy };
+        });
+        
+        // 更新位置和速度
+        for (let i = 0; i < institutes.length; i++) {
+            const force = forces[i];
+            const velocity = velocities[i];
+            
+            // 更新速度（加入阻尼）
+            velocity.vx = (velocity.vx + force.fx) * damping;
+            velocity.vy = (velocity.vy + force.fy) * damping;
+            
+            // 限制最大速度，防止移动过快
+            const maxVelocity = 2;
+            const speed = Math.sqrt(velocity.vx * velocity.vx + velocity.vy * velocity.vy);
+            if (speed > maxVelocity) {
+                velocity.vx = (velocity.vx / speed) * maxVelocity;
+                velocity.vy = (velocity.vy / speed) * maxVelocity;
+            }
+            
+            // 更新位置
+            const oldX = institutes[i].x;
+            const oldY = institutes[i].y;
+            institutes[i].x += velocity.vx;
+            institutes[i].y += velocity.vy;
+            
+            // 累计移动距离，用于判断收敛
+            const movement = Math.sqrt(
+                Math.pow(institutes[i].x - oldX, 2) + 
+                Math.pow(institutes[i].y - oldY, 2)
+            );
+            totalMovement += movement;
+        }
+        
+        // 检查是否收敛
+        const avgMovement = totalMovement / institutes.length;
+        if (avgMovement < convergenceThreshold) {
+            console.log(`位置调整在第 ${iteration + 1} 次迭代后收敛`);
+            break;
+        }
+    }
+    
+    console.log(`位置调整完成，处理了 ${institutes.length} 个机构`);
+}
+
+// 获取筛选后的论文
+function getFilteredPapers() {
+    const selectedYears = getSelectedYears();
+    const selectedConfs = Array.from(document.querySelectorAll('#confFilters input:checked'))
+        .map(input => input.value);
+    
+    console.log("选择的年份:", selectedYears);
+    console.log("选择的会议:", selectedConfs);
+    console.log("总论文数:", allPapers.length);
+    
+    if (selectedYears.length === 0) {
+        console.warn("没有选择任何年份！");
+        return [];
+    }
+    
+    if (selectedConfs.length === 0) {
+        console.warn("没有选择任何会议！");
+        return [];
+    }
+    
+    const filtered = allPapers.filter(paper => {
+        const yearMatch = selectedYears.includes(paper.year);
+        const confMatch = selectedConfs.includes(paper.conf);        
+        return yearMatch && confMatch;
+    });
+    
+    console.log("筛选后论文数:", filtered.length);
+    return filtered;
+}
+
+// 切换章节显示/隐藏
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const button = event.target;
+    
+    if (section.style.display === 'none' || section.style.display === '') {
+        section.style.display = 'block';
+        button.textContent = currentLanguage === 'zh' ? '隐藏' : 'Hide';
+    } else {
+        section.style.display = 'none';
+        button.textContent = currentLanguage === 'zh' ? '显示' : 'Show';
+    }
+}
+
+// 显示机构详情
+function showInstituteDetails(institute) {
+    const panel = document.getElementById('detailPanel');
+    const title = document.getElementById('detailTitle');
+    const content = document.getElementById('detailContent');
+    
+    title.textContent = institute.name;
+    
+    // 在title元素上保存原始机构名称，用于语言切换时的识别
+    title.setAttribute('data-original-name', institute.name);
+    title.removeAttribute('data-unknown-locations');
+    
+    const collabList = Object.entries(instituteStats[institute.name].collaborations)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+    const labels = currentLanguage === 'zh' ? 
+        {
+            papers: '论文数量:',
+            authors: '作者数量:',
+            location: '地理位置:',
+            city: '城市:',
+            focus: '研究方向:',
+            purpose: '机构性质:',
+            website: '网站:',
+            collaborations: '主要合作机构:',
+            collabCount: '次合作'
+        } : 
+        {
+            papers: 'Papers:',
+            authors: 'Authors:',
+            location: 'Location:',
+            city: 'City:',
+            focus: 'Research Focus:',
+            purpose: 'Purpose:',
+            website: 'Website:',
+            collaborations: 'Main Collaborations:',
+            collabCount: 'collaborations'
+        };
+    
+    // 获取机构的详细信息
+    const locationInfo = institute.location;
+    
+    let contentHtml = `
+        <div class="stat-item">
+            <span class="stat-label">${labels.papers}</span>
+            <span class="stat-value">${institute.papers}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">${labels.authors}</span>
+            <span class="stat-value">${institute.authors}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">${labels.location}</span>
+            <span class="stat-value">${locationInfo.country}</span>
+        </div>`;
+    
+    // 添加城市信息（如果存在）
+    if (locationInfo.city) {
+        contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${labels.city}</span>
+            <span class="stat-value">${locationInfo.city}</span>
+        </div>`;
+    }
+    
+    // 添加机构性质信息（如果存在）
+    if (locationInfo.purpose) {
+        contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${labels.purpose}</span>
+            <span class="stat-value">${locationInfo.purpose}</span>
+        </div>`;
+    }
+    
+    // 添加网站链接（如果存在）
+    if (locationInfo.url) {
+        contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${labels.website}</span>
+            <span class="stat-value"><a href="${locationInfo.url}" target="_blank" style="color: #64b5f6; text-decoration: none;">${locationInfo.url}</a></span>
+        </div>`;
+    }
+    
+    // 添加研究方向信息（如果存在）
+    if (locationInfo.focus) {
+        contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${labels.focus}</span>
+            <span class="stat-value" style="font-size: 10px; line-height: 1.3;">${locationInfo.focus}</span>
+        </div>`;
+    }
+    
+    // 添加机构logo（如果存在）
+    if (locationInfo.image_url) {
+        contentHtml += `
+        <div class="stat-item" style="text-align: center; margin: 10px 0;">
+            <img src="${locationInfo.image_url}" alt="Institution Logo" style="max-width: 100%; max-height: 60px; object-fit: contain;">
+        </div>`;
+    }
+    
+    // 获取该机构的research groups
+    const instituteGroups = research_groups.filter(group => group.institute === institute.name);
+    
+    // 添加research groups信息（如果存在）
+    if (instituteGroups.length > 0) {
+        const groupsLabel = currentLanguage === 'zh' ? '研究课题组:' : 'Research Groups:';
+        contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${groupsLabel}</span>
+        </div>`;
+        
+        instituteGroups.forEach(group => {
+            let groupHtml = '<div style="margin-left: 10px; font-size: 11px; color: #ccc; margin-bottom: 8px;">';
+            
+            // 显示课题组名称（如果存在且不为空）
+            if (group.group_name && group.group_name.trim() !== '') {
+                groupHtml += `<div style="font-weight: bold; color: #fff;">${group.group_name}</div>`;
+            }
+            
+            // 显示课题组网址（如果存在）
+            if (group.url) {
+                groupHtml += `<div><a href="${group.url}" target="_blank" style="color: #64b5f6; text-decoration: none;">${group.url}</a></div>`;
+            }
+            
+            // 显示研究方向（如果存在）
+            if (group.focus) {
+                const focusLabel = currentLanguage === 'zh' ? '研究方向: ' : 'Focus: ';
+                groupHtml += `<div style="font-size: 10px; margin-top: 2px;">${focusLabel}${group.focus}</div>`;
+            }
+            
+            // 显示课题组logo（如果存在）
+            if (group.image_url) {
+                groupHtml += `<div style="margin-top: 4px;"><img src="${group.image_url}" alt="Group Logo" style="max-width: 80px; max-height: 30px; object-fit: contain;"></div>`;
+            }
+            
+            groupHtml += '</div>';
+            contentHtml += groupHtml;
+        });
+    }
+    
+    // 添加合作机构信息
+    contentHtml += `
+        <div class="stat-item">
+            <span class="stat-label">${labels.collaborations}</span>
+        </div>
+        ${collabList.map(([inst, count]) => `
+            <div style="margin-left: 10px; font-size: 11px; color: #ccc;">
+                ${inst}: ${count} ${labels.collabCount}
+            </div>
+        `).join('')}
+    `;
+    
+    // 获取该机构的论文列表
+    const institutePapers = paper_info_list.filter(paper => 
+        paper.institutes && paper.institutes.includes(institute.name)
+    );
+    
+    // 获取该机构的作者列表
+    const instituteAuthors = authors_of_institute[institute.name] || [];
+    
+    // 添加论文列表（可折叠）
+    if (institutePapers.length > 0) {
+        const papersLabel = currentLanguage === 'zh' ? '论文列表' : 'Papers List';
+        const showLabel = currentLanguage === 'zh' ? '显示' : 'Show';
+        const hideLabel = currentLanguage === 'zh' ? '隐藏' : 'Hide';
+        
+        contentHtml += `
+        <div class="stat-item" style="margin-top: 15px;">
+            <span class="stat-label">${papersLabel} (${institutePapers.length})</span>
+            <button onclick="toggleSection('papers-${institute.name.replace(/[^a-zA-Z0-9]/g, '')}')" 
+                    style="margin-left: 10px; padding: 2px 8px; font-size: 10px; background: #555; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                ${showLabel}
+            </button>
+        </div>
+        <div id="papers-${institute.name.replace(/[^a-zA-Z0-9]/g, '')}" style="display: none; max-height: 200px; overflow-y: auto; margin: 5px 0; padding: 5px; background: #2a2a2a; border-radius: 3px;">
+            ${institutePapers.map((paper, index) => `
+                <div style="font-size: 10px; color: #ccc; margin-bottom: 8px; padding: 5px; background: #333; border-radius: 2px;">
+                    <div style="font-weight: bold; color: #fff; margin-bottom: 2px;">${index + 1}. ${paper.title}</div>
+                    <div style="color: #aaa;">Year: ${paper.year} | Conference: ${paper.conf}</div>
+                    ${paper.authors ? `<div style="color: #999; margin-top: 2px;">Authors: ${paper.authors.join(', ')}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
+        `;
+    }
+    
+    // 添加作者列表（可折叠）
+    if (instituteAuthors.length > 0) {
+        const authorsLabel = currentLanguage === 'zh' ? '作者列表' : 'Authors List';
+        const showLabel = currentLanguage === 'zh' ? '显示' : 'Show';
+        
+        contentHtml += `
+        <div class="stat-item" style="margin-top: 15px;">
+            <span class="stat-label">${authorsLabel} (${instituteAuthors.length})</span>
+            <button onclick="toggleSection('authors-${institute.name.replace(/[^a-zA-Z0-9]/g, '')}')" 
+                    style="margin-left: 10px; padding: 2px 8px; font-size: 10px; background: #555; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                ${showLabel}
+            </button>
+        </div>
+        <div id="authors-${institute.name.replace(/[^a-zA-Z0-9]/g, '')}" style="display: none; max-height: 200px; overflow-y: auto; margin: 5px 0; padding: 5px; background: #2a2a2a; border-radius: 3px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                ${instituteAuthors.map(author => `
+                    <span style="font-size: 10px; color: #fff; background: #444; padding: 3px 6px; border-radius: 10px;">${author}</span>
+                `).join('')}
+            </div>
+        </div>
+        `;
+    }
+    
+    content.innerHTML = contentHtml;
+    
+    panel.style.display = 'block';
+}
+
+// 显示未知位置机构的详情
+function showUnknownLocationDetails(unknownInstitutes) {
+    const panel = document.getElementById('detailPanel');
+    const title = document.getElementById('detailTitle');
+    const content = document.getElementById('detailContent');
+    
+    const titleText = currentLanguage === 'zh' ? '未知位置机构' : 'Unknown Locations';
+    title.textContent = titleText;
+    
+    // 设置标识，用于语言切换时识别
+    title.setAttribute('data-unknown-locations', 'true');
+    title.removeAttribute('data-original-name');
+    
+    const totalPapers = unknownInstitutes.reduce((sum, inst) => sum + inst.papers, 0);
+    const totalAuthors = unknownInstitutes.reduce((sum, inst) => sum + inst.authors, 0);
+    
+    // 按论文数量排序
+    const sortedInstitutes = unknownInstitutes.sort((a, b) => b.papers - a.papers);
+
+    const labels = currentLanguage === 'zh' ? 
+        {
+            totalInstitutes: '机构总数:',
+            totalPapers: '论文总数:',
+            totalAuthors: '作者总数:',
+            instituteList: '机构列表:',
+            papers: '论文',
+            authors: '作者'
+        } : 
+        {
+            totalInstitutes: 'Total Institutions:',
+            totalPapers: 'Total Papers:',
+            totalAuthors: 'Total Authors:',
+            instituteList: 'Institution List:',
+            papers: 'Papers',
+            authors: 'Authors'
+        };
+    
+    content.innerHTML = `
+        <div class="stat-item">
+            <span class="stat-label">${labels.totalInstitutes}</span>
+            <span class="stat-value">${unknownInstitutes.length}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">${labels.totalPapers}</span>
+            <span class="stat-value">${totalPapers}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">${labels.totalAuthors}</span>
+            <span class="stat-value">${totalAuthors}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">${labels.instituteList}</span>
+        </div>
+        <div style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
+            ${sortedInstitutes.map(inst => `
+                <div style="margin-left: 10px; font-size: 11px; color: #ccc; margin-bottom: 5px; padding: 3px; border-left: 2px solid #666;">
+                    <div style="font-weight: bold;">${inst.name}</div>
+                    <div>${labels.papers}: ${inst.papers} | ${labels.authors}: ${inst.authors}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+    
+    panel.style.display = 'block';
+}
+
+// 显示未知位置点的悬浮标签
+function showUnknownLocationLabel(instituteCount, totalPapers, x, y) {
+    if (!document.getElementById('showLabels').checked) {
+        // 移除现有的悬浮标签
+        g.selectAll(".hover-label").remove();
+        
+        // 获取当前缩放比例
+        const currentTransform = d3.zoomTransform(svg.node());
+        const scale = currentTransform.k;
+        const scaleFactor = Math.sqrt(scale);
+        
+        // 添加悬浮标签
+        g.append("text")
+            .attr("class", "hover-label")
+            .attr("x", x + 15)
+            .attr("y", y - 5)
+            .text(`Unknown Locations (${instituteCount} institutes, ${totalPapers} papers)`)
+            .style("pointer-events", "none")
+            .style("font-size", (12 / scaleFactor) + "px")
+            .style("fill", "white")
+            .style("text-shadow", "1px 1px 2px rgba(0,0,0,0.8)")
+            .style("font-weight", "500");
+    }
+}
+
+// 面板折叠控制
+function togglePanel() {
+    const panel = document.getElementById('controlPanel');
+    const btn = document.getElementById('collapseBtn');
+    
+    panel.classList.toggle('collapsed');
+    btn.textContent = panel.classList.contains('collapsed') ? '▼' : '▲';
+}
+
+// 年份选择器相关函数
+function createYearSelector() {
+    const yearSelector = document.getElementById('yearSelector');
+    const currentYear = new Date().getFullYear();
+    
+    console.log("Available years from data:", Array.from(availableYears));
+    
+    // 生成2015-2025年的选项
+    for (let year = 2015; year <= 2025; year++) {
+        const yearStr = year.toString(); // 确保匹配字符串格式
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `year-${yearStr}`;
+        checkbox.checked = true; // 默认全选
+        checkbox.addEventListener('change', updateMapVisualization);
+        
+        const label = document.createElement('label');
+        label.htmlFor = `year-${yearStr}`;
+        label.textContent = yearStr;
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'year-option';
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(label);
+        
+        yearSelector.appendChild(wrapper);
+    }
+    
+    console.log("Year selector created with", yearSelector.children.length, "options");
+}
+
+function getSelectedYears() {
+    const years = [];
+    for (let year = 2015; year <= 2025; year++) {
+        const yearStr = year.toString(); // 确保字符串格式
+        const checkbox = document.getElementById(`year-${yearStr}`);
+        if (checkbox && checkbox.checked) {
+            years.push(yearStr); // 返回字符串格式以匹配数据
+        }
+    }
+    console.log("选择的年份:", years);
+    return years;
+}
+
+// 会议选择器相关函数
+function selectAllConfs() {
+    console.log("selectAllConfs called");
+    const checkboxes = document.querySelectorAll('#confFilters input[type="checkbox"]');
+    console.log("Found checkboxes:", checkboxes.length);
+    checkboxes.forEach(cb => {
+        cb.checked = true;
+        console.log("Checked:", cb.value);
+    });
+    updateMapVisualization();
+}
+
+function clearAllConfs() {
+    console.log("clearAllConfs called");
+    const checkboxes = document.querySelectorAll('#confFilters input[type="checkbox"]');
+    console.log("Found checkboxes:", checkboxes.length);
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        console.log("Unchecked:", cb.value);
+    });
+    updateMapVisualization();
+}
+
+function selectTopConfs() {
+    console.log("selectTopConfs called");
+    const topConfs = ['CVPR', 'ICCV', 'ECCV', 'NEURIPS', 'ICML', 'ICLR', 'AAAI', 'IJCAI'];
+    const checkboxes = document.querySelectorAll('#confFilters input[type="checkbox"]');
+    console.log("Found checkboxes:", checkboxes.length);
+    checkboxes.forEach(cb => {
+        const shouldCheck = topConfs.includes(cb.value);
+        cb.checked = shouldCheck;
+        console.log(`${shouldCheck ? 'Checked' : 'Unchecked'}:`, cb.value);
+    });
+    updateMapVisualization();
+}
+
+// 初始化控制面板
+function initializeControls() {
+    // 创建年份选择器
+    createYearSelector();
+    
+    // 会议筛选 - 先清空现有内容
+    const confFilters = document.querySelector('#confFilters');
+    confFilters.innerHTML = '';
+    
+    console.log("Available conferences:", Array.from(availableConfs));
+    
+    Array.from(availableConfs).sort().forEach(conf => {
+        const div = document.createElement('div');
+        div.className = 'filter-checkbox';
+        div.innerHTML = `
+            <input type="checkbox" id="conf_${conf}" value="${conf}" checked>
+            <label for="conf_${conf}">${conf}</label>
+        `;
+        confFilters.appendChild(div);
+        
+        div.querySelector('input').addEventListener('change', updateMapVisualization);
+    });
+    
+    console.log("Conference checkboxes created:", confFilters.children.length);
+    
+    // 最小合作次数滑块
+    const minCollabSlider = document.getElementById('minCollabSlider');
+    const minCollabDisplay = document.getElementById('minCollabDisplay');
+    
+    minCollabSlider.addEventListener('input', function() {
+        minCollabDisplay.textContent = this.value;
+        updateMapVisualization();
+    });
+    
+    // 显示选项
+    document.getElementById('showLabels').addEventListener('change', updateMapVisualization);
+    document.getElementById('showCollaborations').addEventListener('change', updateMapVisualization);
+    
+    // 关闭详情面板
+    document.getElementById('closeDetailButton').addEventListener('click', function() {
+        document.getElementById('detailPanel').style.display = 'none';
+    });
+}
+
+// 初始化应用
+async function initializeApp() {
+    console.log("开始初始化应用...");
+    initializeData();
+    console.log("数据初始化完成，可用会议:", Array.from(availableConfs));
+    console.log("可用年份:", Array.from(availableYears));
+    
+    console.log("开始初始化地图...");
+    await initializeMap();
+    console.log("地图初始化完成，开始初始化控制面板...");
+    initializeControls();
+    console.log("控制面板初始化完成，开始更新地图可视化...");
+    
+    // 确保默认语言显示正确
+    updateLanguageDisplay();
+    
+    // 延迟一点执行更新，确保DOM完全准备好
+    setTimeout(() => {
+        updateMapVisualization();
+        console.log("应用初始化完成！");
+    }, 100);
+}
+
+// 窗口调整大小事件
+window.addEventListener('resize', function() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    svg.attr("width", width).attr("height", height);
+    projection.scale(300).translate([width / 2, height / 2]);  // 保持和初始化时相同的scale值
+    
+    // 重新绘制所有路径
+    g.selectAll(".countries").attr("d", path);
+    updateMapVisualization();
+});
+
+// 年份播放功能
+let isPlaying = false;
+let playbackInterval = null;
+const PLAYBACK_DELAY = 2000; // 2秒间隔
+
+function getAllYears() {
+    const years = [];
+    for (let year = 2015; year <= 2025; year++) {
+        years.push(year);
+    }
+    return years.sort((a, b) => a - b);
+}
+
+function setYearSelection(targetYear) {
+    // 首先取消所有年份的选择
+    for (let year = 2015; year <= 2025; year++) {
+        const checkbox = document.getElementById(`year-${year}`);
+        if (checkbox) {
+            checkbox.checked = year === targetYear;
+        }
+    }
+    // 更新地图显示
+    updateMapVisualization();
+}
+
+function toggleYearPlayback() {
+    const playButton = document.getElementById('playButton');
+    
+    if (isPlaying) {
+        // 停止播放
+        stopPlayback();
+    } else {
+        // 开始播放
+        startPlayback();
+    }
+}
+
+function startPlayback() {
+    isPlaying = true;
+    const playButton = document.getElementById('playButton');
+    playButton.textContent = '⏸ 停止';
+    playButton.classList.add('playing');
+    
+    const years = getAllYears();
+    let currentIndex = 0;
+    
+    // 立即显示第一个年份
+    setYearSelection(years[currentIndex]);
+    currentIndex++;
+    
+    // 设置定时器逐个播放剩余年份
+    playbackInterval = setInterval(() => {
+        if (currentIndex >= years.length) {
+            // 播放完成，停止
+            stopPlayback();
+            return;
+        }
+        
+        setYearSelection(years[currentIndex]);
+        currentIndex++;
+    }, PLAYBACK_DELAY);
+}
+
+function stopPlayback() {
+    isPlaying = false;
+    const playButton = document.getElementById('playButton');
+    playButton.textContent = '▶ 播放';
+    playButton.classList.remove('playing');
+    
+    if (playbackInterval) {
+        clearInterval(playbackInterval);
+        playbackInterval = null;
+    }
+}
+
+// 语言切换功能
+let currentLanguage = 'en'; // 默认英文
+
+function toggleLanguage(event) {
+    // 阻止事件冒泡，防止触发面板的打开/关闭
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+    updateLanguageDisplay();
+    
+    // 更新按钮文本
+    const langBtn = document.getElementById('langBtn');
+    langBtn.title = currentLanguage === 'zh' ? '切换中/英文显示' : 'Toggle Chinese/English Display';
+}
+
+function updateLanguageDisplay() {
+    // 更新所有带有data-zh和data-en属性的元素
+    const elements = document.querySelectorAll('[data-zh][data-en]');
+    elements.forEach(element => {
+        const text = element.getAttribute(`data-${currentLanguage}`);
+        if (text) {
+            element.textContent = text;
+        }
+    });
+    
+    // 更新控制面板标题
+    const panelTitle = document.querySelector('.panel-title');
+    if (panelTitle) {
+        panelTitle.textContent = currentLanguage === 'zh' ? '控制面板' : 'Control Panel';
+    }
+    
+    // 更新过滤器标签
+    updateFilterLabels();
+    
+    // 更新图例
+    updateLegend();
+    
+    // 如果详情面板当前打开，重新渲染其内容
+    const detailPanel = document.getElementById('detailPanel');
+    if (detailPanel && detailPanel.style.display === 'block') {
+        // 如果有当前显示的机构信息，重新显示
+        const detailTitle = document.getElementById('detailTitle');
+        if (detailTitle) {
+            // 检查是否有保存的原始机构名称
+            const originalName = detailTitle.getAttribute('data-original-name');
+            if (originalName && instituteStats[originalName]) {
+                // 这是一个具体的机构，重新显示其详情
+                const instituteData = {
+                    name: originalName,
+                    papers: instituteStats[originalName].papers,
+                    authors: instituteStats[originalName].authorCount,
+                    location: getInstituteLocation(originalName)
+                };
+                showInstituteDetails(instituteData);
+            } else if (detailTitle.textContent === 'Unknown Locations' || 
+                      detailTitle.textContent === '未知位置机构' ||
+                      detailTitle.getAttribute('data-unknown-locations') === 'true') {
+                // 这是未知位置的显示，需要重新计算和显示
+                const filteredPapers = getFilteredPapers();
+                computeStats(filteredPapers);
+                
+                const unknownInstitutes = [];
+                Object.keys(instituteStats).forEach(institute => {
+                    const location = getInstituteLocation(institute);
+                    const stats = instituteStats[institute];
+                    
+                    if (!location || (location.lat === 0 && location.lon === 0) || location.country === "unknown") {
+                        unknownInstitutes.push({
+                            name: institute,
+                            papers: stats.papers,
+                            authors: stats.authorCount,
+                            location: location
+                        });
+                    }
+                });
+                
+                if (unknownInstitutes.length > 0) {
+                    showUnknownLocationDetails(unknownInstitutes);
+                }
+            }
+        }
+    }
+}
+
+function updateFilterLabels() {
+    // 更新年份选择标签
+    const yearLabel = document.querySelector('.year-header .filter-label');
+    if (yearLabel) {
+        yearLabel.textContent = currentLanguage === 'zh' ? '年份选择' : 'Year Selection';
+    }
+    
+    // 更新播放按钮
+    const playButton = document.getElementById('playButton');
+    if (playButton && !isPlaying) {
+        playButton.textContent = currentLanguage === 'zh' ? '▶ 播放' : '▶ Play';
+    }
+    
+    // 更新会议控制按钮
+    const confBtns = document.querySelectorAll('.conf-control-btn');
+    const confBtnTexts = currentLanguage === 'zh' ? ['全选', '清空', '主要会议'] : ['Select All', 'Clear All', 'Main Conferences'];
+    confBtns.forEach((btn, index) => {
+        if (confBtnTexts[index]) {
+            btn.textContent = confBtnTexts[index];
+        }
+    });
+    
+    // 更新过滤器组标签（按特定顺序）
+    const filterGroups = document.querySelectorAll('.filter-group');
+    const filterLabelTexts = currentLanguage === 'zh' ? 
+        ['年份选择', '会议筛选', '最小合作次数', '显示选项'] : 
+        ['Year Selection', 'Conference Filter', 'Min Collaborations', 'Display Options'];
+    
+    filterGroups.forEach((group, index) => {
+        const label = group.querySelector('.filter-label');
+        if (label && filterLabelTexts[index]) {
+            label.textContent = filterLabelTexts[index];
+        }
+    });
+    
+    // 只更新显示选项区域的复选框标签（不包括会议筛选区域的）
+    const displayOptionsGroup = Array.from(document.querySelectorAll('.filter-group')).find(group => {
+        const label = group.querySelector('.filter-label');
+        return label && (label.textContent.includes('显示选项') || label.textContent.includes('Display Options'));
+    });
+    
+    if (displayOptionsGroup) {
+        const checkboxLabels = displayOptionsGroup.querySelectorAll('.filter-checkbox label');
+        const checkboxTexts = currentLanguage === 'zh' ? 
+            ['显示机构标签', '显示合作连线'] : 
+            ['Show Institution Labels', 'Show Collaborations'];
+        
+        checkboxLabels.forEach((label, index) => {
+            if (checkboxTexts[index]) {
+                label.textContent = checkboxTexts[index];
+            }
+        });
+    }
+}
+
+function updateLegend() {
+    const legendItems = document.querySelectorAll('#legend .legend-item span');
+    const legendTexts = currentLanguage === 'zh' ? 
+        ['机构位置', '未知位置机构', '合作关系'] : 
+        ['Institution Location', 'Unknown Location', 'Collaboration'];
+    
+    legendItems.forEach((item, index) => {
+        if (legendTexts[index]) {
+            item.textContent = legendTexts[index];
+        }
+    });
+}
+
+// 信息模态框功能
+function showInfoModal(event) {
+    // 阻止事件冒泡，防止触发面板的打开/关闭
+    if (event) {
+        event.stopPropagation();
+    }
+    
+    const modal = document.getElementById('infoModal');
+    modal.style.display = 'block';
+    
+    // 防止页面滚动
+    document.body.style.overflow = 'hidden';
+}
+
+function closeInfoModal() {
+    const modal = document.getElementById('infoModal');
+    modal.style.display = 'none';
+    
+    // 恢复页面滚动
+    document.body.style.overflow = 'auto';
+}
+
+// 点击模态框外部关闭
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('infoModal');
+    if (event.target === modal) {
+        closeInfoModal();
+    }
+});
+
+// 按ESC键关闭模态框
+window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeInfoModal();
+    }
+});
+
+// 启动应用
+initializeApp();
+
+</script>
+</body>
+</html>
