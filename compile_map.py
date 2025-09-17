@@ -76,6 +76,7 @@ def make_map():
 	return paper_info_list, authors_of_institute, institute_info, research_groups
 
 
+
 def inject_data_to_template(template_name="template_map.html", output_name="result_map.html"):
 	"""Read template file and inject data"""
 	paper_info_list, authors_of_institute, institute_info, research_groups = make_map()
@@ -127,4 +128,10 @@ def inject_data_to_template(template_name="template_map.html", output_name="resu
 
 
 if __name__ == "__main__":
+	# Generate the geographic map
+	print("Generating geographic map...")
 	inject_data_to_template("template_map.html", "result_map.html")
+	
+	# Generate the bar chart
+	print("Generating bar chart...")
+	inject_data_to_template("template_bar_graph.html", "result_bar_graph.html")

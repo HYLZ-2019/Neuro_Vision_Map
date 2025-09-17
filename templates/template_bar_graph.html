@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Neuromorphic Vision Papers Timeline - Bar Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .control-section {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .control-section h3 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 1.0em;
+            font-weight: 600;
+        }
+
+        .conference-controls {
+            flex: 1;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 4px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .checkbox-item:hover {
+            background: #f1f3f4;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 5px;
+            width: 13px;
+            height: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            font-size: 0.8em;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            color: #2c3e50;
+            line-height: 1.2;
+        }
+
+        .quick-actions {
+            flex-shrink: 0;
+            width: 160px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 520px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 3px solid;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Conference colors */
+        .cvpr { border-left-color: #e74c3c; }
+        .iccv { border-left-color: #3498db; }
+        .eccv { border-left-color: #2ecc71; }
+        .aaai { border-left-color: #f39c12; }
+        .icml { border-left-color: #9b59b6; }
+        .neurips { border-left-color: #1abc9c; }
+        .ijcai { border-left-color: #34495e; }
+        .others { border-left-color: #95a5a6; }
+
+        /* Scrollbar styling */
+        .conference-controls::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .conference-controls::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .conference-controls::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .conference-controls::-webkit-scrollbar-thumb:hover {
+            background: #5a6fd8;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Color theme selector styling */
+        .color-theme-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .color-theme-section h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .theme-selector {
+            margin-top: 0;
+        }
+
+        .theme-selector select {
+            width: 100%;
+            max-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .theme-selector select:hover {
+            border-color: #667eea;
+        }
+
+        .theme-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">Neuromorphic Vision Research Timeline</div>
+            <div class="subtitle">Publications by Conference/Journal Over Time (Stacked by Year)</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-section conference-controls">
+                <h3>📊 Conference/Journal Selection</h3>
+                <div class="checkbox-grid" id="conferenceCheckboxes">
+                    <!-- Checkboxes will be dynamically generated here -->
+                </div>
+            </div>
+
+            <div class="control-section quick-actions">
+                <h3>⚡ Quick Actions</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="selectTop10()">Top 10 Conferences</button>
+                    <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
+                    <button class="btn btn-secondary" onclick="selectNone()">Deselect All</button>
+                    <button class="btn btn-secondary" onclick="selectMajorConferences()">Major CV Conferences</button>
+                </div>
+                <div class="color-theme-section">
+                    <h4>🎨 Color Theme</h4>
+                    <div class="theme-selector">
+                        <select id="colorTheme" onchange="changeColorTheme()">
+                            <option value="vibrant" selected>Vibrant Rainbow</option>
+                            <option value="professional">Professional Business</option>
+                            <option value="pastel">Soft Pastel</option>
+                            <option value="dark">Dark Tech</option>
+                            <option value="nature">Fresh Nature</option>
+                            <option value="sunset">Warm Sunset</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Loading chart data...</div>
+            </div>
+            <canvas id="paperChart" style="display: none;"></canvas>
+        </div>
+
+        <div class="stats" id="statsContainer">
+            <!-- Statistics will be dynamically generated here -->
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let paperInfoList = [[INJECT_PAPER_INFO_LIST_HERE]];
+        let chart = null;
+        let conferenceColors = {};
+        let conferenceData = {};
+
+        // Conference color palettes - multiple themes
+        const colorPalettes = {
+            vibrant: [
+                '#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', 
+                '#e67e22', '#1abc9c', '#34495e', '#e91e63', '#ff6b6b',
+                '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3',
+                '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43', '#a55eea',
+                '#26de81', '#fc5c65', '#fd79a8', '#fdcb6e', '#6c5ce7'
+            ],
+            professional: [
+                '#2c3e50', '#34495e', '#7f8c8d', '#95a5a6', '#bdc3c7',
+                '#3498db', '#2980b9', '#5dade2', '#85c1e9', '#aed6f1',
+                '#e74c3c', '#c0392b', '#ec7063', '#f1948a', '#f5b7b1',
+                '#f39c12', '#e67e22', '#f8c471', '#fad7a0', '#fdeaa7',
+                '#27ae60', '#229954', '#58d68d', '#82e0aa', '#a9dfbf'
+            ],
+            pastel: [
+                '#ffb3ba', '#ffdfba', '#ffffba', '#baffc9', '#bae1ff',
+                '#d4a4eb', '#ffc09f', '#fcf5c7', '#aecf9e', '#b4c7e7',
+                '#f8cecc', '#ffe599', '#d5e8d4', '#cfe2f3', '#e1d5e7',
+                '#fdd5d7', '#fff2cc', '#d0e0e3', '#f3e2f3', '#e6f3ff',
+                '#ffeaa7', '#fab1a0', '#fd79a8', '#a29bfe', '#6c5ce7'
+            ],
+            dark: [
+                '#2d3436', '#636e72', '#b2bec3', '#ddd', '#0984e3',
+                '#74b9ff', '#00b894', '#00cec9', '#e17055', '#fdcb6e',
+                '#e84393', '#fd79a8', '#6c5ce7', '#a29bfe', '#55a3ff',
+                '#26de81', '#fd79a8', '#fdcb6e', '#e17055', '#74b9ff',
+                '#0984e3', '#00cec9', '#00b894', '#e84393', '#6c5ce7'
+            ],
+            nature: [
+                '#27ae60', '#2ecc71', '#58d68d', '#82e0aa', '#a9dfbf',
+                '#f39c12', '#f1c40f', '#f7dc6f', '#f9e79f', '#fcf3cf',
+                '#8b4513', '#a0522d', '#cd853f', '#daa520', '#f4a460',
+                '#2980b9', '#3498db', '#5dade2', '#85c1e9', '#aed6f1',
+                '#c0392b', '#e74c3c', '#ec7063', '#f1948a', '#f5b7b1'
+            ],
+            sunset: [
+                '#ff7675', '#fd79a8', '#fdcb6e', '#e17055', '#d63031',
+                '#e84393', '#a29bfe', '#6c5ce7', '#74b9ff', '#0984e3',
+                '#00cec9', '#00b894', '#55a3ff', '#2d3436', '#636e72',
+                '#fab1a0', '#ff7675', '#fd79a8', '#fdcb6e', '#e17055',
+                '#00b894', '#00cec9', '#74b9ff', '#6c5ce7', '#a29bfe'
+            ]
+        };
+
+        let currentColorPalette = colorPalettes.vibrant;
+
+        // Process data and initialize
+        function initializeChart() {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('paperChart').style.display = 'none';
+
+            // Process paper data
+            processData();
+            
+            // Create conference checkboxes
+            createConferenceCheckboxes();
+            
+            // Initialize chart
+            setTimeout(() => {
+                createChart();
+                updateStats();
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('paperChart').style.display = 'block';
+            }, 500);
+        }
+
+        function processData() {
+            conferenceData = {};
+            const conferenceCount = {};
+
+            // Count papers per conference and year
+            paperInfoList.forEach(paper => {
+                const [title, year, source, institutes] = paper;
+                const yearNum = parseInt(year);
+                
+                if (isNaN(yearNum) || yearNum < 2010 || yearNum > 2030) return;
+
+                if (!conferenceData[source]) {
+                    conferenceData[source] = {};
+                    conferenceCount[source] = 0;
+                }
+                
+                if (!conferenceData[source][yearNum]) {
+                    conferenceData[source][yearNum] = 0;
+                }
+                
+                conferenceData[source][yearNum]++;
+                conferenceCount[source]++;
+            });
+
+            // Sort conferences by total paper count
+            const sortedConferences = Object.entries(conferenceCount)
+                .sort(([,a], [,b]) => b - a)
+                .map(([conf,]) => conf);
+
+            // Assign colors
+            sortedConferences.forEach((conf, index) => {
+                conferenceColors[conf] = currentColorPalette[index % currentColorPalette.length];
+            });
+
+            // Keep data as yearly counts (not cumulative)
+            // Data is already in the correct format for stacked bar chart
+        }
+
+        function createConferenceCheckboxes() {
+            const container = document.getElementById('conferenceCheckboxes');
+            const conferences = Object.keys(conferenceData)
+                .sort((a, b) => {
+                    const countA = Math.max(...Object.values(conferenceData[a] || {}));
+                    const countB = Math.max(...Object.values(conferenceData[b] || {}));
+                    return countB - countA;
+                });
+
+            conferences.forEach((conf, index) => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `conf_${conf}`;
+                checkbox.value = conf;
+                checkbox.checked = index < 10; // Default: top 10
+                checkbox.addEventListener('change', updateChart);
+
+                const label = document.createElement('label');
+                label.htmlFor = `conf_${conf}`;
+                label.textContent = conf;
+                label.style.color = conferenceColors[conf];
+
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('paperChart').getContext('2d');
+            
+            // Get all years from 2010 to 2025
+            const allYears = [];
+            for (let year = 2010; year <= 2025; year++) {
+                allYears.push(year);
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: allYears,
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Neuromorphic Vision Papers by Conference/Journal (Stacked by Year)',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 8,
+                                font: {
+                                    size: 10
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'rect'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255,255,255,0.2)',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function(context) {
+                                    return `Year: ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} papers`;
+                                },
+                                afterBody: function(context) {
+                                    const total = context.reduce((sum, item) => sum + item.parsed.y, 0);
+                                    return `Total in ${context[0].label}: ${total} papers`;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Year',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            categoryPercentage: 0.8,
+                            barPercentage: 0.9
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Papers',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            updateChart();
+        }
+
+        function updateChart() {
+            if (!chart) return;
+
+            const selectedConferences = Array.from(document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            const allYears = [];
+            for (let year = 2010; year <= 2025; year++) {
+                allYears.push(year);
+            }
+
+            const datasets = selectedConferences.map(conf => {
+                const data = allYears.map(year => {
+                    return conferenceData[conf] && conferenceData[conf][year] ? conferenceData[conf][year] : 0;
+                });
+
+                return {
+                    label: conf,
+                    data: data,
+                    backgroundColor: conferenceColors[conf],
+                    borderWidth: 0,
+                    borderRadius: 0,
+                    borderSkipped: false,
+                };
+            });
+
+            chart.data.datasets = datasets;
+            chart.update();
+            updateStats();
+        }
+
+        function updateStats() {
+            const selectedConferences = Array.from(document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            let totalPapers = 0;
+            let totalConferences = selectedConferences.length;
+            let latestYear = 0;
+            let earliestYear = 9999;
+
+            // Calculate total papers across all selected conferences and years
+            selectedConferences.forEach(conf => {
+                if (conferenceData[conf]) {
+                    const years = Object.keys(conferenceData[conf]).map(y => parseInt(y));
+                    const paperCounts = Object.values(conferenceData[conf]);
+                    totalPapers += paperCounts.reduce((sum, count) => sum + count, 0);
+                    
+                    if (years.length > 0) {
+                        latestYear = Math.max(latestYear, Math.max(...years));
+                        earliestYear = Math.min(earliestYear, Math.min(...years));
+                    }
+                }
+            });
+
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #e74c3c;">${totalPapers}</div>
+                    <div class="stat-label">Total Papers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #3498db;">${totalConferences}</div>
+                    <div class="stat-label">Selected Venues</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #2ecc71;">${earliestYear === 9999 ? 'N/A' : earliestYear}</div>
+                    <div class="stat-label">First Year</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color: #f39c12;">${latestYear === 0 ? 'N/A' : latestYear}</div>
+                    <div class="stat-label">Latest Year</div>
+                </div>
+            `;
+        }
+
+        // Control functions
+        function selectTop10() {
+            const checkboxes = document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                cb.checked = index < 10;
+            });
+            updateChart();
+        }
+
+        function selectAll() {
+            const checkboxes = document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            updateChart();
+        }
+
+        function selectNone() {
+            const checkboxes = document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            updateChart();
+        }
+
+        function selectMajorConferences() {
+            const majorConfs = ['CVPR', 'ICCV', 'ECCV', 'AAAI', 'ICML', 'NeurIPS', 'IJCAI'];
+            const checkboxes = document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = majorConfs.includes(cb.value);
+            });
+            updateChart();
+        }
+
+        function changeColorTheme() {
+            const themeSelect = document.getElementById('colorTheme');
+            const selectedTheme = themeSelect.value;
+            currentColorPalette = colorPalettes[selectedTheme];
+            
+            // Update conference colors with new palette
+            const conferences = Object.keys(conferenceData);
+            conferences.forEach((conf, index) => {
+                conferenceColors[conf] = currentColorPalette[index % currentColorPalette.length];
+            });
+            
+            // Update chart with new colors
+            updateChart();
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeChart);
+    </script>
+</body>
+</html>
