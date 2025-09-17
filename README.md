@@ -18,7 +18,7 @@ All source data is in `data/*.py`.
 
 1. `data/paper_list.py`: 
 
-	This is the original list of papers, including source (e.g. CVPR 2025), title and type (conference/journal/book). The data was initially sourced from [Recent papers on Event-based Vision](https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8/edit?gid=0#gid=0).
+	This is the original list of papers, including source (e.g. CVPR 2025), title and type (conference/journal/book). The data was initially sourced from Prof. Guillermo Gallego's [Recent papers on Event-based Vision](https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8/edit?gid=0#gid=0).
 
 2. `data/paper_authors.py`: 
 
