@@ -52,18 +52,18 @@ If you would like to contribute, edit the `data/*.py` files and submit a pull re
 
 **Q. I want to add a new paper to the database.**
 
-	Add the paper to `data/paper_list.py`, and add the author list to `data/paper_authors.py`. Ensure that the author affiliations are standard institute names, or can be mapped to standard names by `data/institutes_alias_to_name.py`.
+Add the paper to `data/paper_list.py`, and add the author list to `data/paper_authors.py`. Ensure that the author affiliations are standard institute names, or can be mapped to standard names by `data/institutes_alias_to_name.py`.
 
 **Q. There are duplications of the same institute with different names.**
 
-	Edit `data/institutes_alias_to_name.py` to map them to the same name.
+Edit `data/institutes_alias_to_name.py` to map them to the same name.
 
 **Q. The location of an institute is wrong.**
 	
-	To prevent dots from lapping over each other, I wrote a simple algorithm in the map to randomly shift each dot.
+To prevent dots from lapping over each other, I wrote a simple algorithm in the map to randomly shift each dot.
 
-	If the location error is so large that it cannot be explained by the random shift algorithm, please edit `data/institute_info.py` to correct the latitude and longitude.
+If the location error is so large that it cannot be explained by the random shift algorithm, please edit `data/institute_info.py` to correct the latitude and longitude.
 
 **Q. I want to add a research group.**
 
-	Please edit `data/research_groups.py` to add the group.
+Please edit `data/research_groups.py` to add the group.
