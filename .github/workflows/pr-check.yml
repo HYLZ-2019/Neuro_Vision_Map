@@ -6,6 +6,12 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
 
+# Grant GITHUB_TOKEN the permissions required to comment on PR
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   check-compilation:
     runs-on: ubuntu-latest

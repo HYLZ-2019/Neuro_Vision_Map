@@ -31,12 +31,6 @@ jobs:
         with:
           python-version: '3.11'
           
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # Install basic packages that might be needed
-          pip install json5
-          
       - name: Run compile_map.py
         run: |
           echo "🔄 Compiling map..."
