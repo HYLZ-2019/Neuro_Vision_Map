@@ -76,12 +76,12 @@ def make_map():
 	return paper_info_list, authors_of_institute, institute_info, research_groups
 
 
-def inject_data_to_template():
+def inject_data_to_template(template_name="template_map.html", output_name="result_map.html"):
 	"""Read template file and inject data"""
 	paper_info_list, authors_of_institute, institute_info, research_groups = make_map()
 	
 	# Read template file
-	template_path = "templates/template_map.html"
+	template_path = f"templates/{template_name}"
 	try:
 		with open(template_path, 'r', encoding='utf-8') as f:
 			template_content = f.read()
@@ -116,11 +116,10 @@ def inject_data_to_template():
 	html_content = html_content.replace('[[INJECT_RESEARCH_GROUPS_HERE]]', research_groups_json)
 	
 	# Write result to output file
-	output_path = "result_map.html"
 	try:
-		with open(output_path, 'w', encoding='utf-8') as f:
+		with open(output_name, 'w', encoding='utf-8') as f:
 			f.write(html_content)
-		print(f"Successfully generated '{output_path}'")
+		print(f"Successfully generated '{output_name}'")
 		return True
 	except Exception as e:
 		print(f"Error writing output file: {e}")
@@ -128,4 +127,4 @@ def inject_data_to_template():
 
 
 if __name__ == "__main__":
-	inject_data_to_template()
+	inject_data_to_template("template_map.html", "result_map.html")
