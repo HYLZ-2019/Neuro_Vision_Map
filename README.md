@@ -2,9 +2,13 @@
 
 This project visualizes the locations of all institutes that have published neuromorphic vision papers, showing growing international participation and collaboration. Click the link below to view:
 
-https://hylz-2019.github.io/Neuro_Vision_Map/
+https://hylz-2019.github.io/Neuro_Vision_Map/map.html
 
-All data is collected from public sources. Feel free to include the graph in your PPTs and reports!
+An interactive bar chart showing the number of papers published by different conferences/journals over the years is also available:
+
+https://hylz-2019.github.io/Neuro_Vision_Map/bar.html
+
+All data is collected from public sources. Feel free to include the graphs in your PPTs and reports!
 
 You might have noticed that some information is missing or incorrect. It would be great if you could help improve the project by contributing to this repository. I will first explain how the project works, and then give some Q&As on how to contribute.
 

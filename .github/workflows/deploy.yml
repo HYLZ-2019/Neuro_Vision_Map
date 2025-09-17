@@ -40,17 +40,28 @@ jobs:
         run: |
           if [ -f "result_map.html" ]; then
             echo "✅ result_map.html generated successfully"
-            echo "📊 File size: $(du -h result_map.html | cut -f1)"
+            echo "📊 Map file size: $(du -h result_map.html | cut -f1)"
             ls -la result_map.html
           else
             echo "❌ result_map.html was not generated"
             exit 1
           fi
           
+          if [ -f "result_bar_graph.html" ]; then
+            echo "✅ result_bar_graph.html generated successfully"
+            echo "📊 Bar chart file size: $(du -h result_bar_graph.html | cut -f1)"
+            ls -la result_bar_graph.html
+          else
+            echo "❌ result_bar_graph.html was not generated"
+            exit 1
+          fi
+          
       - name: Prepare deployment directory
         run: |
           mkdir -p ./deploy
-          cp result_map.html ./deploy/index.html
+          cp result_map.html ./deploy/map.html
+          cp result_bar_graph.html ./deploy/bar.html
+          cp templates/index.html ./deploy/index.html
           
       - name: Setup Pages
         uses: actions/configure-pages@v5
