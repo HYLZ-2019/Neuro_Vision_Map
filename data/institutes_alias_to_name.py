@@ -1,6 +1,8 @@
 # This data is used to map different aliases of the same institute to a unified name.
 # The keys of the dict are the aliases, the values are the unified names.
 
+bad syntax error test pr check
+
 get_inst_name = {
     "Institute for Infocomm Research (I2R), A*STAR, Singapore": "A*STAR",
     "Institute for Infocomm Research, A*STAR": "A*STAR",
