@@ -6,15 +6,16 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
 
-# Grant GITHUB_TOKEN the permissions required to comment on PR
+# Minimal permissions for external contributors
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
 
 jobs:
   check-compilation:
     runs-on: ubuntu-latest
+    outputs:
+      success: ${{ steps.compile.outputs.success }}
+      pr_number: ${{ github.event.number }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -37,30 +38,28 @@ jobs:
             exit 1
           fi
           
-      - name: Check if result file was generated
+      - name: Check if result files were generated
         if: steps.compile.outputs.success == 'true'
         run: |
-          if [ -f "result_map.html" ]; then
-            echo "✅ result_map.html was successfully generated"
-            echo "📊 File size: $(du -h result_map.html | cut -f1)"
+          if [ -f "result_map.html" ] && [ -f "result_bar_graph.html" ]; then
+            echo "✅ Both result files were successfully generated"
+            echo "📊 Map file size: $(du -h result_map.html | cut -f1)"
+            echo "📊 Bar chart file size: $(du -h result_bar_graph.html | cut -f1)"
           else
-            echo "⚠️ result_map.html was not generated"
+            echo "⚠️ One or more result files were not generated"
             exit 1
           fi
+
+      - name: Save PR info for comment workflow
+        run: |
+          mkdir -p ./pr-info
+          echo "${{ github.event.number }}" > ./pr-info/pr_number
+          echo "${{ steps.compile.outputs.success }}" > ./pr-info/success
+          echo "${{ github.run_id }}" > ./pr-info/run_id
           
-      - name: Comment on PR
-        if: always()
-        uses: actions/github-script@v7
+      - name: Upload PR info
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const success = '${{ steps.compile.outputs.success }}' === 'true';
-            const message = success 
-              ? '✅ **Compilation Check Passed** \n\n`compile_map.py` ran successfully without errors. The code is ready to be merged.'
-              : '❌ **Compilation Check Failed** \n\n`compile_map.py` encountered errors during execution. Please check your code changes. See [Action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.';
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
+          name: pr-info
+          path: ./pr-info/
+          retention-days: 1
