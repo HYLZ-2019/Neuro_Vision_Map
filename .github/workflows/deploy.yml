@@ -53,14 +53,19 @@ jobs:
             exit 1
           fi
           
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p ./deploy
+          cp result_map.html ./deploy/index.html
+          
       - name: Setup Pages
         uses: actions/configure-pages@v5
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload result_map.html as static page
-          path: './result_map.html'
+          # Upload deployment directory containing index.html
+          path: './deploy'
           
   # Deployment job
   deploy:
