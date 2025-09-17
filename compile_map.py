@@ -18,6 +18,8 @@ def make_map():
 	for paper in paper_authors:
 		paper_title_to_authors[paper['title']] = paper['authors']
 
+	papers_per_author = {}
+
 	for paper in paper_list:
 		year_source = paper[0]
 		title = paper[1]
@@ -37,6 +39,7 @@ def make_map():
 		
 		related_institutes = set()
 		for author, institute in authors:
+			papers_per_author[author] = papers_per_author.get(author, 0) + 1
 			if institute != "" and institute.lower() != "unknown":
 				# Some authors may have multiple institutes separated by ';'
 				multiple_insts = [inst.strip() for inst in institute.split(';') if inst.strip()]
@@ -67,6 +70,8 @@ def make_map():
 	# Convert authors_of_institute sets to lists
 	for inst in authors_of_institute:
 		authors_of_institute[inst] = list(authors_of_institute[inst])
+		# Sort them by number of papers they authored (descending)
+		authors_of_institute[inst].sort(key=lambda author: papers_per_author.get(author, 0), reverse=True)
 
 	return paper_info_list, authors_of_institute, institute_info, research_groups
 
