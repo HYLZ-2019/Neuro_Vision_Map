@@ -1,0 +1,75 @@
+name: Deploy to GitHub Pages
+run-name: Building and deploying static site 🚀
+
+on:
+  push:
+    branches: [main]
+  # Also supports manual triggering
+  workflow_dispatch:
+
+# Set GITHUB_TOKEN permissions to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the running and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install basic packages that might be needed
+          pip install json5
+          
+      - name: Run compile_map.py
+        run: |
+          echo "🔄 Compiling map..."
+          python compile_map.py
+          
+      - name: Verify output
+        run: |
+          if [ -f "result_map.html" ]; then
+            echo "✅ result_map.html generated successfully"
+            echo "📊 File size: $(du -h result_map.html | cut -f1)"
+            ls -la result_map.html
+          else
+            echo "❌ result_map.html was not generated"
+            exit 1
+          fi
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload result_map.html as static page
+          path: './result_map.html'
+          
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

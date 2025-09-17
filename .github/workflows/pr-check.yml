@@ -1,0 +1,66 @@
+name: Pull Request Check
+run-name: Checking PR for compilation errors 🔍
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-compilation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install basic packages that might be needed
+          pip install json5
+          
+      - name: Run compile_map.py
+        id: compile
+        run: |
+          echo "🔄 Running compile_map.py..."
+          if python compile_map.py; then
+            echo "✅ Compilation successful!"
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Compilation failed!"
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: Check if result file was generated
+        if: steps.compile.outputs.success == 'true'
+        run: |
+          if [ -f "result_map.html" ]; then
+            echo "✅ result_map.html was successfully generated"
+            echo "📊 File size: $(du -h result_map.html | cut -f1)"
+          else
+            echo "⚠️ result_map.html was not generated"
+            exit 1
+          fi
+          
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success = '${{ steps.compile.outputs.success }}' === 'true';
+            const message = success 
+              ? '✅ **Compilation Check Passed** \n\n`compile_map.py` ran successfully without errors. The code is ready to be merged.'
+              : '❌ **Compilation Check Failed** \n\n`compile_map.py` encountered errors during execution. Please check your code changes. See [Action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
