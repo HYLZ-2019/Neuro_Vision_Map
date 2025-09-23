@@ -1494,5 +1494,10 @@ get_inst_name = {
     "Zhejiang University, Hangzhou, China and Shanghai AI Laboratory, Shanghai, China": "Zhejiang University",
     "ZHAW Zurich University of Applied Sciences, WÃ¤denswil, Switzerland": "Zurich University of Applied Sciences",
     "ZHAW Zurich University of Applied Sciences/Intel Neuromorphic Computing Lab": "Zurich University of Applied Sciences",
-    "Ãcole Polytechnique FÃ©dÃ©rale de Lausanne, Geneva, Switzerland": "École Polytechnique Fédérale de Lausanne",	
+    "Ãcole Polytechnique FÃ©dÃ©rale de Lausanne, Geneva, Switzerland": "École Polytechnique Fédérale de Lausanne",
+    "Institute for Pattern Recognition, Hochschule Niederrhein, Krefeld, Germany": "Hochschule Niederrhein University of Applied Sciences",
+    "Competence Center for Social Urban Design, Hochschule Niederrhein, Krefeld, Germany": "Hochschule Niederrhein University of Applied Sciences",
+    "Department of Simulation and Graphics, University of Magdeburg, Germany": "Otto von Guericke University Magdeburg",
+    "State Institute of Bee-Research, University of Hohenheim, Stuttgart, Germany": "University of Hohenheim",
+    "Karlsruhe University of Applied Sciences, Karlsruhe, Germany": "Karlsruhe University of Applied Sciences"
 }
