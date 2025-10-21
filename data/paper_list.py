@@ -1874,6 +1874,7 @@ paper_list = [
     ['CISP-BMEI 2023', 'Laser Scanning Measurement based on Event Cameras', 'c'],
     ['CISP-BMEI 2023', 'Speckle-Projection-Based High-Speed 3D Reconstruction Using Event Cameras', 'c'],
     ['CAIP 2023', 'Fall Detection with Event-Based Data: A Case Study', 'c'],
+    ['CAIP 2025', 'DVS-StereoInsect: An Event-Based Stereo Dataset for Foreground-Background Insect Segmentation', 'c'],
     ['BRICS Workshop on Biophotonics 2023', 'Neuromorphic Localization Microscopy for Cell Biology', 'c'],
     ['BMVC 2023', 'EDeNN: Event Decay Neural Networks for low latency vision', 'c'],
     ['BioCAS 2023', '3ET: Efficient Event-based Eye Tracking using a Change-Based ConvLSTM Network', 'c'],

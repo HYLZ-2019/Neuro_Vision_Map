@@ -649,4 +649,8 @@ institute_info = {
     "Baylor University": {'lat': 31.5479, 'lon': -97.1131, 'country': 'USA'},
     "University of Illinois Urbana-Champaign": {'lat': 40.1126, 'lon': -88.2272, 'country': 'USA'},
     "Microsoft": {'lat': 47.6739, 'lon': -122.1215, 'country': 'USA'},
+    "Hochschule Niederrhein University of Applied Sciences": {'lat': 51.3166, 'lon': 6.5699, 'country': 'Germany'},
+    "Otto von Guericke University Magdeburg": {'lat': 52.1401, 'lon': 11.6447, 'country': 'Germany'},
+    "University of Hohenheim": {'lat': 48.7109 , 'lon': 9.2120, 'country': 'Germany'},
+    "Karlsruhe University of Applied Sciences": {'lat': 49.0155 , 'lon': 8.3914, 'country': 'Germany'}
 }
