@@ -1491,7 +1491,7 @@ get_inst_name = {
     "Competence Center for Social Urban Design, Hochschule Niederrhein, Krefeld, Germany": "Hochschule Niederrhein University of Applied Sciences",
     "Department of Simulation and Graphics, University of Magdeburg, Germany": "Otto von Guericke University Magdeburg",
     "State Institute of Bee-Research, University of Hohenheim, Stuttgart, Germany": "University of Hohenheim",
-    "Karlsruhe University of Applied Sciences, Karlsruhe, Germany": "Karlsruhe University of Applied Sciences"
+    "Karlsruhe University of Applied Sciences, Karlsruhe, Germany": "Karlsruhe University of Applied Sciences",
     "University of Texas at Arlington": "University of Texas at Arlington",
     "Wonkwang University": "Wonkwang University",
 }
