@@ -616,7 +616,7 @@ institute_info = {
     "Hochschule Niederrhein University of Applied Sciences": {'lat': 51.3166, 'lon': 6.5699, 'country': 'Germany'},
     "Otto von Guericke University Magdeburg": {'lat': 52.1401, 'lon': 11.6447, 'country': 'Germany'},
     "University of Hohenheim": {'lat': 48.7109 , 'lon': 9.2120, 'country': 'Germany'},
-    "Karlsruhe University of Applied Sciences": {'lat': 49.0155 , 'lon': 8.3914, 'country': 'Germany'}
+    "Karlsruhe University of Applied Sciences": {'lat': 49.0155 , 'lon': 8.3914, 'country': 'Germany'},
     "RWTH Aachen University": {'lat': 50.777459831217065, 'lon': 6.077549668486038, 'country': 'Germany'},
     "Wonkwang University": {'lat': 35.96890121246657, 'lon': 126.9537851971136, 'country': 'South Korea'},
 }
