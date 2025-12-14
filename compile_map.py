@@ -34,7 +34,7 @@ def make_map():
 		if title in paper_title_to_authors:
 			authors = paper_title_to_authors[title]
 		else:
-			print("Warning: paper title not found in paper_authors:", title)
+			#print("Warning: paper title not found in paper_authors:", title)
 			authors = []
 		
 		related_institutes = set()
@@ -74,7 +74,6 @@ def make_map():
 		authors_of_institute[inst].sort(key=lambda author: papers_per_author.get(author, 0), reverse=True)
 
 	return paper_info_list, authors_of_institute, institute_info, research_groups
-
 
 
 def inject_data_to_template(template_name="template_map.html", output_name="result_map.html"):
@@ -127,7 +126,80 @@ def inject_data_to_template(template_name="template_map.html", output_name="resu
 		return False
 
 
+def sancheck_institutes():
+
+	# For all lines in institutes_alias_to_name.py, check if there are repeated lines(i.e. both "xxxxx":"aa" and "xxxxx": "bb"); then, check if there are any lines that were not used at all.
+	with open("data/institutes_alias_to_name.py", 'r', encoding='utf-8') as f:
+		lines = f.readlines()
+	alias_to_name = {}
+	alias_pattern = re.compile(r'^\s*"(.+?)"\s*:\s*"(.+?)",?\s*(#.*)?$')
+	for line in lines:
+		match = alias_pattern.match(line)
+		if match:
+			alias = match.group(1)
+			name = match.group(2)
+			if alias in alias_to_name:
+				print(f"Warning: Alias '{alias}' is mapped to both '{alias_to_name[alias]}' and '{name}'")
+
+
+	# Count how many different institutes there are before and after alias mapping.
+	original_insts = set()
+	mapped_insts = set()
+	not_mapped_insts = set()
+	unused_aliases = set(get_inst_name.keys())
+	
+	for paper in paper_authors:
+		for author, institute in paper['authors']:
+			if institute != "" and institute.lower() != "unknown":
+				# Some authors may have multiple institutes separated by ';'
+				multiple_insts = [inst.strip() for inst in institute.split(';') if inst.strip()]
+				for inst in multiple_insts:
+					original_insts.add(inst)
+					if inst in get_inst_name:
+						standard_inst_name = get_inst_name[inst]
+						if inst in unused_aliases:
+							unused_aliases.remove(inst)
+					else:
+						standard_inst_name = inst
+						not_mapped_insts.add(inst)
+
+					mapped_insts.add(standard_inst_name)
+	
+	print("Total institute names before mapping: ", len(original_insts))
+	print("Total institute names after mapping: ", len(mapped_insts))
+	print("Institute names directly used: ", len(not_mapped_insts))
+
+	if unused_aliases:
+		print(f"Warning: {len(unused_aliases)} aliases in institutes_alias_to_name.py were not used:")
+		for alias in unused_aliases:
+			print(f"  {alias}")
+
+	# If there is a mapping A->B in get_inst_name, then A and B should finally be mapped to the same name. Do a check to ensure that for all groups connected by mappings (there may be several hops), they have the same mapped name.
+	print("\nChecking for transitive mappings consistency...")
+	inconsistent_chains = []
+	for alias, name in get_inst_name.items():
+		# We want to ensure that 'name' (the target) is not itself an alias that maps to something else.
+		# If name is in get_inst_name, it maps to get_inst_name[name].
+		# If get_inst_name[name] is different from name, then we have a chain alias -> name -> get_inst_name[name].
+		if name in get_inst_name:
+			target = get_inst_name[name]
+			if target != name:
+				inconsistent_chains.append(f"{alias} -> {name} -> {target}")
+
+	if inconsistent_chains:
+		print(f"Found {len(inconsistent_chains)} inconsistent mappings (chains):")
+		for chain in inconsistent_chains:
+			print(f"  {chain}")
+	else:
+		print("Mapping consistency check passed.")
+
+	
+	
+
+
 if __name__ == "__main__":
+	sancheck_institutes()
+
 	# Generate the geographic map
 	print("Generating geographic map...")
 	inject_data_to_template("template_map.html", "result_map.html")
