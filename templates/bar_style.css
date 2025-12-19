@@ -234,43 +234,103 @@ body {
 	100% { transform: rotate(360deg); }
 }
 
-/* Color theme selector styling */
-.color-theme-section {
-	margin-top: 15px;
-	padding-top: 15px;
-	border-top: 1px solid #e9ecef;
+/* Settings Panel Styling */
+.setting-group {
+	margin-bottom: 0;
 }
 
-.color-theme-section h4 {
-	margin: 0 0 8px 0;
-	font-size: 14px;
+.setting-divider {
+	height: 1px;
+	background-color: #e9ecef;
+	margin: 12px 0;
+}
+
+.setting-label {
+	font-size: 0.95em;
 	font-weight: 600;
-	color: #495057;
+	color: #2c3e50;
+	margin-bottom: 8px;
+	display: block;
 }
 
-.theme-selector {
-	margin-top: 0;
+.setting-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
-.theme-selector select {
+.setting-row .setting-label {
+	margin-bottom: 0;
+}
+
+/* Form Controls */
+.form-select {
 	width: 100%;
-	max-width: 200px;
-	padding: 8px 12px;
+	padding: 6px 10px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	font-size: 13px;
+	font-size: 0.9em;
 	background: white;
 	color: #333;
 	cursor: pointer;
-	transition: border-color 0.3s ease;
+	transition: all 0.2s ease;
 }
 
-.theme-selector select:hover {
+.form-select:hover {
 	border-color: #667eea;
 }
 
-.theme-selector select:focus {
+.form-select:focus {
 	outline: none;
 	border-color: #667eea;
 	box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Year Selector Specifics */
+.year-inputs {
+	display: flex;
+	gap: 10px;
+}
+
+.year-input-group {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 2px 8px;
+}
+
+.year-input-group:hover {
+	border-color: #667eea;
+}
+
+.year-input-group .input-label {
+	font-size: 0.85em;
+	color: #6c757d;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.year-input-group select {
+	flex: 1;
+	border: none;
+	background: transparent;
+	padding: 4px 0;
+	font-size: 0.9em;
+	cursor: pointer;
+	width: 100%;
+}
+
+.year-input-group select:focus {
+	outline: none;
+}
+
+/* Language Toggle Button */
+.btn-sm {
+	padding: 4px 12px;
+	font-size: 0.85em;
+	border-radius: 15px; /* Pill shape */
 }

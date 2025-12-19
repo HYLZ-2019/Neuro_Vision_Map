@@ -9,47 +9,62 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">Neuromorphic Vision Research Timeline</div>
-            <div class="subtitle">Publications by Conference/Journal Over Time (Stacked by Year)</div>
+            <div class="title" data-i18n="title">Neuromorphic Vision Research Timeline</div>
+            <div class="subtitle" data-i18n="subtitle">Publications by Conference/Journal Over Time (Stacked by Year)</div>
         </div>
 
         <div class="controls">
             <div class="control-section settings-controls">
-                <h3>📅 Year Range</h3>
-                <div class="year-selector" style="display: flex; gap: 15px; align-items: center;">
-                    <label style="font-weight: 500;">From: <select id="startYear" onchange="updateChart()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; margin-left: 5px;"></select></label>
-                    <label style="font-weight: 500;">To: <select id="endYear" onchange="updateChart()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; margin-left: 5px;"></select></label>
+                <div class="setting-group">
+                    <div class="setting-label" data-i18n="yearRange">📅 Year Range</div>
+                    <div class="year-inputs">
+                        <div class="year-input-group">
+                            <span class="input-label" data-i18n="from">From:</span>
+                            <select id="startYear" onchange="updateChart()"></select>
+                        </div>
+                        <div class="year-input-group">
+                            <span class="input-label" data-i18n="to">To:</span>
+                            <select id="endYear" onchange="updateChart()"></select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="color-theme-section">
-                    <h4>🎨 Color Theme</h4>
-                    <div class="theme-selector">
-                        <select id="colorTheme" onchange="changeColorTheme()">
-                            <option value="vibrant" selected>Vibrant Rainbow</option>
-                            <option value="professional">Professional Business</option>
-                            <option value="pastel">Soft Pastel</option>
-                            <option value="dark">Dark Tech</option>
-                            <option value="nature">Fresh Nature</option>
-                            <option value="sunset">Warm Sunset</option>
-                        </select>
-                    </div>
+                <div class="setting-divider"></div>
+
+                <div class="setting-group">
+                    <div class="setting-label" data-i18n="colorTheme">🎨 Color Theme</div>
+                    <select id="colorTheme" class="form-select" onchange="changeColorTheme()">
+                        <option value="vibrant" selected data-i18n="themeVibrant">Vibrant Rainbow</option>
+                        <option value="professional" data-i18n="themeProfessional">Professional Business</option>
+                        <option value="pastel" data-i18n="themePastel">Soft Pastel</option>
+                        <option value="dark" data-i18n="themeDark">Dark Tech</option>
+                        <option value="nature" data-i18n="themeNature">Fresh Nature</option>
+                        <option value="sunset" data-i18n="themeSunset">Warm Sunset</option>
+                    </select>
+                </div>
+
+                <div class="setting-divider"></div>
+
+                <div class="setting-group setting-row">
+                    <div class="setting-label" data-i18n="language">🌐 Language</div>
+                    <button id="langToggle" class="btn btn-secondary btn-sm" onclick="toggleLanguage()">中文 / English</button>
                 </div>
             </div>
 
             <div class="control-section conference-controls">
-                <h3>📊 Conference/Journal Selection</h3>
+                <h3 data-i18n="confSelection">📊 Conference/Journal Selection</h3>
                 <div class="checkbox-grid" id="conferenceCheckboxes">
                     <!-- Checkboxes will be dynamically generated here -->
                 </div>
             </div>
 
             <div class="control-section quick-actions">
-                <h3>⚡ Quick Actions</h3>
+                <h3 data-i18n="quickActions">⚡ Quick Actions</h3>
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="selectTop10()">Top 10 Conferences</button>
-                    <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
-                    <button class="btn btn-secondary" onclick="selectNone()">Deselect All</button>
-                    <button class="btn btn-secondary" onclick="selectMajorConferences()">Major CV Conferences</button>
+                    <button class="btn btn-primary" onclick="selectTop10()" data-i18n="btnTop10">Top 10 Conferences</button>
+                    <button class="btn btn-secondary" onclick="selectAll()" data-i18n="btnSelectAll">Select All</button>
+                    <button class="btn btn-secondary" onclick="selectNone()" data-i18n="btnDeselectAll">Deselect All</button>
+                    <button class="btn btn-secondary" onclick="selectMajorConferences()" data-i18n="btnMajorCV">Major CV Conferences</button>
                 </div>
             </div>
         </div>
@@ -57,7 +72,7 @@
         <div class="chart-container">
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <div>Loading chart data...</div>
+                <div data-i18n="loading">Loading chart data...</div>
             </div>
             <canvas id="paperChart" style="display: none;"></canvas>
         </div>
@@ -73,6 +88,100 @@
         let chart = null;
         let conferenceColors = {};
         let conferenceData = {};
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                title: "Neuromorphic Vision Research Timeline",
+                subtitle: "Publications by Conference/Journal Over Time",
+                yearRange: "📅 Year Range",
+                from: "From:",
+                to: "To:",
+                colorTheme: "🎨 Color Theme",
+                language: "🌐 Language",
+                themeVibrant: "Vibrant Rainbow",
+                themeProfessional: "Professional Business",
+                themePastel: "Soft Pastel",
+                themeDark: "Dark Tech",
+                themeNature: "Fresh Nature",
+                themeSunset: "Warm Sunset",
+                confSelection: "📊 Conference/Journal Selection",
+                quickActions: "⚡ Quick Actions",
+                btnTop10: "Top 10 Conferences",
+                btnSelectAll: "Select All",
+                btnDeselectAll: "Deselect All",
+                btnMajorCV: "Major CV Conferences",
+                loading: "Loading chart data...",
+                chartTitle: "Neuromorphic Vision Publications by Year",
+                axisYear: "Year",
+                axisPapers: "Number of Papers",
+                tooltipYear: "Year",
+                tooltipTotal: "Total in",
+                statTotal: "Total Papers",
+                statVenues: "Selected Venues",
+                statFirst: "First Year",
+                statLatest: "Latest Year"
+            },
+            zh: {
+                title: "神经形态视觉研究时间轴",
+                subtitle: "各会议/期刊上的神经形态视觉领域论文发表数",
+                yearRange: "📅 年份范围",
+                from: "从:",
+                to: "到:",
+                colorTheme: "🎨 颜色主题",
+                language: "🌐 语言",
+                themeVibrant: "活力彩虹",
+                themeProfessional: "商务专业",
+                themePastel: "柔和粉彩",
+                themeDark: "深色科技",
+                themeNature: "清新自然",
+                themeSunset: "温暖日落",
+                confSelection: "📊 会议/期刊选择",
+                quickActions: "⚡ 快速操作",
+                btnTop10: "前10大发表源",
+                btnSelectAll: "全选",
+                btnDeselectAll: "取消全选",
+                btnMajorCV: "主要CV会议",
+                loading: "正在加载图表数据...",
+                chartTitle: "神经形态视觉领域逐年论文发表数量表",
+                axisYear: "年份",
+                axisPapers: "论文数量",
+                tooltipYear: "年份",
+                tooltipTotal: "总计",
+                statTotal: "论文总数",
+                statVenues: "选中场所",
+                statFirst: "最早年份",
+                statLatest: "最新年份"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLang];
+            
+            // Update static text
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) {
+                    el.textContent = t[key];
+                }
+            });
+
+            // Update chart if it exists
+            if (chart) {
+                chart.options.plugins.title.text = t.chartTitle;
+                chart.options.scales.x.title.text = t.axisYear;
+                chart.options.scales.y.title.text = t.axisPapers;
+                chart.update();
+            }
+
+            // Update stats
+            updateStats();
+        }
 
         // Conference color palettes - multiple themes
         const colorPalettes = {
@@ -269,7 +378,7 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Neuromorphic Vision Papers by Conference/Journal (Stacked by Year)',
+                            text: translations[currentLang].chartTitle,
                             font: {
                                 size: 16,
                                 weight: 'bold'
@@ -299,14 +408,14 @@
                             borderWidth: 1,
                             callbacks: {
                                 title: function(context) {
-                                    return `Year: ${context[0].label}`;
+                                    return `${translations[currentLang].tooltipYear}: ${context[0].label}`;
                                 },
                                 label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y} papers`;
+                                    return `${context.dataset.label}: ${context.parsed.y} ${translations[currentLang].axisPapers}`;
                                 },
                                 afterBody: function(context) {
                                     const total = context.reduce((sum, item) => sum + item.parsed.y, 0);
-                                    return `Total in ${context[0].label}: ${total} papers`;
+                                    return `${translations[currentLang].tooltipTotal} ${context[0].label}: ${total} ${translations[currentLang].axisPapers}`;
                                 }
                             }
                         }
@@ -320,7 +429,7 @@
                             stacked: true,
                             title: {
                                 display: true,
-                                text: 'Year',
+                                text: translations[currentLang].axisYear,
                                 font: {
                                     size: 14,
                                     weight: 'bold'
@@ -336,7 +445,7 @@
                             stacked: true,
                             title: {
                                 display: true,
-                                text: 'Number of Papers',
+                                text: translations[currentLang].axisPapers,
                                 font: {
                                     size: 14,
                                     weight: 'bold'
@@ -443,19 +552,19 @@
             statsContainer.innerHTML = `
                 <div class="stat-item">
                     <div class="stat-value" style="color: #e74c3c;">${totalPapers}</div>
-                    <div class="stat-label">Total Papers</div>
+                    <div class="stat-label">${translations[currentLang].statTotal}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" style="color: #3498db;">${totalConferences}</div>
-                    <div class="stat-label">Selected Venues</div>
+                    <div class="stat-label">${translations[currentLang].statVenues}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" style="color: #2ecc71;">${earliestYear === 9999 ? 'N/A' : earliestYear}</div>
-                    <div class="stat-label">First Year</div>
+                    <div class="stat-label">${translations[currentLang].statFirst}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value" style="color: #f39c12;">${latestYear === 0 ? 'N/A' : latestYear}</div>
-                    <div class="stat-label">Latest Year</div>
+                    <div class="stat-label">${translations[currentLang].statLatest}</div>
                 </div>
             `;
         }
