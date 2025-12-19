@@ -89,8 +89,15 @@ def inject_data_to_template(template_name="template_map.html", output_name="resu
 		print(f"Error: Template file '{template_path}' not found")
 		return False
 	
-	# Read CSS file
-	css_path = "templates/map_style.css"
+	if template_name == "template_map.html":
+		# Read CSS file
+		css_path = "templates/map_style.css"
+		css_link = '<link rel="stylesheet" type="text/css" href="../map_style.css">'
+	elif template_name == "template_bar_graph.html":
+		# Read CSS file
+		css_path = "templates/bar_style.css"
+		css_link = '<link rel="stylesheet" type="text/css" href="../bar_style.css">'
+
 	try:
 		with open(css_path, 'r', encoding='utf-8') as f:
 			css_content = f.read()
@@ -99,7 +106,6 @@ def inject_data_to_template(template_name="template_map.html", output_name="resu
 		return False
 	
 	# Replace external CSS link with inline style
-	css_link = '<link rel="stylesheet" type="text/css" href="../map_style.css">'
 	inline_css = f'<style>\n{css_content}\n</style>'
 	template_content = template_content.replace(css_link, inline_css)
 	
