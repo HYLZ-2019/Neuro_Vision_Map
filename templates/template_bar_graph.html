@@ -14,6 +14,28 @@
         </div>
 
         <div class="controls">
+            <div class="control-section settings-controls">
+                <h3>📅 Year Range</h3>
+                <div class="year-selector" style="display: flex; gap: 15px; align-items: center;">
+                    <label style="font-weight: 500;">From: <select id="startYear" onchange="updateChart()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; margin-left: 5px;"></select></label>
+                    <label style="font-weight: 500;">To: <select id="endYear" onchange="updateChart()" style="padding: 5px; border-radius: 4px; border: 1px solid #ddd; margin-left: 5px;"></select></label>
+                </div>
+
+                <div class="color-theme-section">
+                    <h4>🎨 Color Theme</h4>
+                    <div class="theme-selector">
+                        <select id="colorTheme" onchange="changeColorTheme()">
+                            <option value="vibrant" selected>Vibrant Rainbow</option>
+                            <option value="professional">Professional Business</option>
+                            <option value="pastel">Soft Pastel</option>
+                            <option value="dark">Dark Tech</option>
+                            <option value="nature">Fresh Nature</option>
+                            <option value="sunset">Warm Sunset</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="control-section conference-controls">
                 <h3>📊 Conference/Journal Selection</h3>
                 <div class="checkbox-grid" id="conferenceCheckboxes">
@@ -28,19 +50,6 @@
                     <button class="btn btn-secondary" onclick="selectAll()">Select All</button>
                     <button class="btn btn-secondary" onclick="selectNone()">Deselect All</button>
                     <button class="btn btn-secondary" onclick="selectMajorConferences()">Major CV Conferences</button>
-                </div>
-                <div class="color-theme-section">
-                    <h4>🎨 Color Theme</h4>
-                    <div class="theme-selector">
-                        <select id="colorTheme" onchange="changeColorTheme()">
-                            <option value="vibrant" selected>Vibrant Rainbow</option>
-                            <option value="professional">Professional Business</option>
-                            <option value="pastel">Soft Pastel</option>
-                            <option value="dark">Dark Tech</option>
-                            <option value="nature">Fresh Nature</option>
-                            <option value="sunset">Warm Sunset</option>
-                        </select>
-                    </div>
                 </div>
             </div>
         </div>
@@ -112,6 +121,8 @@
         };
 
         let currentColorPalette = colorPalettes.vibrant;
+        let minDataYear = 2010;
+        let maxDataYear = 2025;
 
         // Process data and initialize
         function initializeChart() {
@@ -133,16 +144,48 @@
             }, 500);
         }
 
+        function populateYearSelects() {
+            const startSelect = document.getElementById('startYear');
+            const endSelect = document.getElementById('endYear');
+            
+            startSelect.innerHTML = '';
+            endSelect.innerHTML = '';
+            
+            for (let y = minDataYear; y <= maxDataYear; y++) {
+                const opt1 = document.createElement('option');
+                opt1.value = y;
+                opt1.textContent = y;
+                startSelect.appendChild(opt1);
+                
+                const opt2 = document.createElement('option');
+                opt2.value = y;
+                opt2.textContent = y;
+                endSelect.appendChild(opt2);
+            }
+            
+            // Set defaults
+            startSelect.value = minDataYear;
+            endSelect.value = maxDataYear;
+        }
+
         function processData() {
             conferenceData = {};
             const conferenceCount = {};
+            
+            // Reset min/max
+            minDataYear = 9999;
+            maxDataYear = 0;
 
             // Count papers per conference and year
             paperInfoList.forEach(paper => {
                 const [title, year, source, institutes] = paper;
                 const yearNum = parseInt(year);
                 
-                if (isNaN(yearNum) || yearNum < 2010 || yearNum > 2030) return;
+                if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) return;
+
+                // Update min/max
+                minDataYear = Math.min(minDataYear, yearNum);
+                maxDataYear = Math.max(maxDataYear, yearNum);
 
                 if (!conferenceData[source]) {
                     conferenceData[source] = {};
@@ -156,6 +199,9 @@
                 conferenceData[source][yearNum]++;
                 conferenceCount[source]++;
             });
+            
+            // Populate year selects
+            populateYearSelects();
 
             // Sort conferences by total paper count
             const sortedConferences = Object.entries(conferenceCount)
@@ -205,9 +251,9 @@
         function createChart() {
             const ctx = document.getElementById('paperChart').getContext('2d');
             
-            // Get all years from 2010 to 2025
+            // Get all years from min to max
             const allYears = [];
-            for (let year = 2010; year <= 2025; year++) {
+            for (let year = minDataYear; year <= maxDataYear; year++) {
                 allYears.push(year);
             }
 
@@ -318,10 +364,24 @@
             const selectedConferences = Array.from(document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]:checked'))
                 .map(cb => cb.value);
 
+            // Get selected years
+            let startYear = parseInt(document.getElementById('startYear').value);
+            let endYear = parseInt(document.getElementById('endYear').value);
+            
+            if (startYear > endYear) {
+                // Swap if inverted
+                [startYear, endYear] = [endYear, startYear];
+                document.getElementById('startYear').value = startYear;
+                document.getElementById('endYear').value = endYear;
+            }
+
             const allYears = [];
-            for (let year = 2010; year <= 2025; year++) {
+            for (let year = startYear; year <= endYear; year++) {
                 allYears.push(year);
             }
+            
+            // Update chart labels
+            chart.data.labels = allYears;
 
             const datasets = selectedConferences.map(conf => {
                 const data = allYears.map(year => {
@@ -347,6 +407,14 @@
             const selectedConferences = Array.from(document.querySelectorAll('#conferenceCheckboxes input[type="checkbox"]:checked'))
                 .map(cb => cb.value);
 
+            // Get selected years
+            let startYear = parseInt(document.getElementById('startYear').value);
+            let endYear = parseInt(document.getElementById('endYear').value);
+            
+            if (startYear > endYear) {
+                [startYear, endYear] = [endYear, startYear];
+            }
+
             let totalPapers = 0;
             let totalConferences = selectedConferences.length;
             let latestYear = 0;
@@ -356,12 +424,17 @@
             selectedConferences.forEach(conf => {
                 if (conferenceData[conf]) {
                     const years = Object.keys(conferenceData[conf]).map(y => parseInt(y));
-                    const paperCounts = Object.values(conferenceData[conf]);
-                    totalPapers += paperCounts.reduce((sum, count) => sum + count, 0);
                     
-                    if (years.length > 0) {
-                        latestYear = Math.max(latestYear, Math.max(...years));
-                        earliestYear = Math.min(earliestYear, Math.min(...years));
+                    // Filter years based on selection
+                    const validYears = years.filter(y => y >= startYear && y <= endYear);
+                    
+                    validYears.forEach(y => {
+                        totalPapers += conferenceData[conf][y];
+                    });
+                    
+                    if (validYears.length > 0) {
+                        latestYear = Math.max(latestYear, Math.max(...validYears));
+                        earliestYear = Math.min(earliestYear, Math.min(...validYears));
                     }
                 }
             });
