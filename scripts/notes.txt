@@ -1,0 +1,16 @@
+更新流程：
+1. 从https://docs.google.com/spreadsheets/d/1_OBbSz10CkxXNDHQd-Mn_ui3OmymMFvm-lW316uvxy8导出最新版本的csv表格到raw/paper_list_xxxx.csv
+2. 修改get_paper_list.py中的csv表格路径。
+
+coze方案（爬arxiv上的pdf，看第一页上的作者和机构）：
+3. 重新生成coze平台API KEY，放在secrets.py
+4. `python scripts/coze_get_authors.py`爬取作者信息到raw/got_authors.txt。
+5. `python scripts/merge_coze_paper_list.py`合并新论文列表和作者列表到data/paper_list.py、data/paper_authors.py。
+
+ieee方案（用semantic scholar找DOI号，然后去ieeexplorer摘要页找作者和机构）：
+4. `python scripts/ieee_get_authors.py`爬取作者信息到raw/ieee_author_log.txt。
+5. `python scripts/merge_ss_paper_list.py`合并新论文列表和作者列表到data/paper_list.py、data/paper_authors.py。
+
+6. `python scripts/renew_alias_map.py`给所有新增的机构名增加TODO项。人工或LLM地进行修改。prompt: 将这些TODO的行都映射到单位对应的一级单位（如Peking University）。你是一个copilot里的agent，请直接编辑文件，不要用命令行。这个任务对准确度要求不高，不要思考，直接上手一行一行改吧。有点多，但是我相信你。一鼓作气干活，不用询问我是否要继续。
+7. `python deepseek_get_geo_info.py`获取新增机构的地理信息，更新data/institute_info.py。
+8. `python compile_map.py`生成新版地图。
