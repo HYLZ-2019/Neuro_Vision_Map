@@ -180,6 +180,15 @@ def sancheck_institutes():
 		for alias in unused_aliases:
 			print(f"  {alias}")
 
+	insts_without_geo = []
+	for inst in mapped_insts:
+		if inst not in institute_info:
+			insts_without_geo.append(inst)
+	if insts_without_geo:
+		print(f"\nWarning: {len(insts_without_geo)} mapped institutes do not have geographic info in institute_info.py:")
+		for inst in insts_without_geo:
+			print(f"  {inst}")
+
 	# If there is a mapping A->B in get_inst_name, then A and B should finally be mapped to the same name. Do a check to ensure that for all groups connected by mappings (there may be several hops), they have the same mapped name.
 	print("\nChecking for transitive mappings consistency...")
 	inconsistent_chains = []
@@ -199,12 +208,33 @@ def sancheck_institutes():
 	else:
 		print("Mapping consistency check passed.")
 
-	
-	
-
+def sancheck_authors():
+	# Check how many papers do not have author lists.
+	# Check how many papers have authors with institute as "unknown" or "".
+	papers_without_authors = []
+	papers_with_unknown_insts = []
+	for paper in paper_list:
+		title = paper[1]
+		authors = None
+		for pa in paper_authors:
+			if pa['title'] == title:
+				authors = pa['authors']
+				break
+		if authors is None or len(authors) == 0:
+			papers_without_authors.append(title)
+		else:
+			for author, institute in authors:
+				if institute == "" or institute.lower() == "unknown":
+					papers_with_unknown_insts.append(title)
+					break
+	print(f"\nSanity check on authors:")
+	print(f"Total papers with author lists and institutes: {len(paper_list) - len(papers_without_authors) - len(papers_with_unknown_insts)}")
+	print(f"Total papers without author lists: {len(papers_without_authors)}")
+	print(f"Total papers with authors having unknown or empty institutes: {len(papers_with_unknown_insts)}")
 
 if __name__ == "__main__":
 	sancheck_institutes()
+	sancheck_authors()
 
 	# Generate the geographic map
 	print("Generating geographic map...")
