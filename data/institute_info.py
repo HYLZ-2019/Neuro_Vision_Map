@@ -969,6 +969,7 @@ institute_info = {
     'Université Rouen Normandie': {'lat': 49.4431, 'lon': 1.0993, 'country': 'France'},
     'Université Toulouse 3': {'lat': 43.5615, 'lon': 1.4681, 'country': 'France'},
     'Université Toulouse III': {'lat': 43.6047, 'lon': 1.4442, 'country': 'France'},
+	'Aix Marseille University': {'lat': 43.2982, 'lon': 5.3814, 'country': 'France'},
 	'Ataraxia Technologies': {'lat': None, 'lon': None, 'country': None},
     'Avolution AI': {'lat': None, 'lon': None, 'country': None},
     'Brain Mind Innovation': {'lat': None, 'lon': None, 'country': None},
