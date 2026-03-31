@@ -2,6 +2,8 @@
 
 
 paper_list = [
+    ['NCE 2026', 'Line‑based Event Preprocessing: Towards Low‑Energy Neuromorphic Computer Vision', 'j'],
+    ['TCDS 2026', 'Object Detection with Spiking Neural Networks on Event Videos for Driving Scenarios', 'j'],
     ['VIJ 2025', 'URNet: Uncertainty-aware Refinement Network for Event-based Stereo Depth Estimation', 'j'],
     ['Vehicles 2025', 'Enhancing Autonomous Driving Perception: A Practical Approach to Event-Based Object Detection in CARLA and ROS', 'j'],
     ['TVLSI 2025', 'ASNA-Flow: An Efficient Asynchronous Neuromorphic Accelerator for Real-Time Event-Based Optical Flow', 'j'],
@@ -536,6 +538,8 @@ paper_list = [
     ['AAAI 2025', 'Motion-adaptive Transformer for Event-based Image Deblurring', 'c'],
     ['AAAI 2025', 'SMamba: Sparse Mamba for Event-based Object Detection', 'c'],
     ['AAAI 2025', 'UCF-Crime-DVS: A Novel Event-Based Dataset for Video Anomaly Detection with Spiking Neural Networks', 'c'],
+    ['AICAS 2025', 'Performance Evaluation of Neuromorphic Visual Attention Based on Proto‑Objects', 'c'],
+    ['AICAS 2025', 'Spatiotemporal Trigger on Event Data for Backdoor Attack on Spiking Neural Networks', 'c'],
     ['3DV 2025', 'E-3DGS: Event-Based Novel View Rendering of Large-Scale Scenes Using 3D Gaussian Splatting', 'c'],
     ['preprint 2025', '6-DoF Object Tracking with Event-based Optical Flow and Frames', ''],
     ['preprint 2025', 'A Linear N-Point Solver for Structure and Motion from Asynchronous Tracks', ''],
@@ -1296,6 +1300,7 @@ paper_list = [
     ['AIAA 2024', 'AsyncELF: Development of Event-Based 3D Imaging for Hypersonic FSI Measurements', 'c'],
     ['AIAA 2024', 'EventStream: Spatiotemporal Event Clustering for Feature Detection and Tracking', 'c'],
     ['AIAA 2024', 'Toward Event-Based Noise-Robust High Density Particle Velocimetry', 'c'],
+    ['AICAS 2024', 'Neuromorphic Event‑based Line Detection on SpiNNaker', 'c'],
     ['ACM SIGGRAPH posters 2024', 'Adaptive Sampling for Monte-Carlo Event Imagery Rendering', 'c'],
     ['ACM MM 2024', 'Adaptive Vision Transformer for Event-Based Human Pose Estimation', 'c'],
     ['ACM MM 2024', 'Color4E: Event Demosaicing for Full-color Event Guided Image Deblurring', 'c'],

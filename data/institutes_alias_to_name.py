@@ -2783,6 +2783,7 @@ get_inst_name = {
     'UMR S968 Inserm/UPMC/CNRS 7210, Institut de la Vision, Université de Pierre et Marie Curie, Paris, France': 'Sorbonne University',
     'UMass Amherst': 'UMass Amherst',
     'Univ. Bordeaux, CNRS, Bordeaux INP, LaBRI, Talence, France': 'University of Bordeaux',
+    'Laboratoire de l’Intégration du Matériau au Système, Univ. Bordeaux, Bordeaux INP, CNRS- F-33400 Talence, France': 'University of Bordeaux',
     'Univ. Grenoble Alpes, CEA, List, Grenoble, France': 'Inria',
     'Univ. Lille, CNRS, Centrale Lille, UMR 9189 CRIStAL': 'University of Lille',
     'Universidad Nacional de Educación a Distancia (UNED), Madrid, Spain': 'UNED',
