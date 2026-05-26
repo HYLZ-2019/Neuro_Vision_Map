@@ -2918,4 +2918,5 @@ get_inst_name = {
 	'Instituto Universitário de Lisboa (ISCTE-IUL)': 'Instituto Universitário de Lisboa (ISCTE-IUL)',
 	'Noah’s Ark Lab, Huawei Technologies': 'Huawei Noah’s Ark Lab',
 	'Humboldt University of Berlin': 'Humboldt University of Berlin',
+	'Center for Machine Learning (ZML), Heilbronn University of Applied Sciences, Heilbronn, Germany': 'Heilbronn University of Applied Sciences',
 }
