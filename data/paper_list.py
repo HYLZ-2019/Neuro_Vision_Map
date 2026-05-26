@@ -2,6 +2,7 @@
 
 
 paper_list = [
+    ['CVPR 2026', 'Generative Anonymization in Event Streams', 'c'],
     ['NCE 2026', 'Line‑based Event Preprocessing: Towards Low‑Energy Neuromorphic Computer Vision', 'j'],
     ['TCDS 2026', 'Object Detection with Spiking Neural Networks on Event Videos for Driving Scenarios', 'j'],
     ['VIJ 2025', 'URNet: Uncertainty-aware Refinement Network for Event-based Stereo Depth Estimation', 'j'],
