@@ -191,6 +191,14 @@ function initializeData() {
     
 }
 
+function getSortedAvailableYears() {
+    return Array.from(availableYears)
+        .map(year => String(year))
+        .filter(year => /^\d{4}$/.test(year))
+        .map(year => parseInt(year, 10))
+        .sort((a, b) => a - b);
+}
+
 // 颜色生成函数
 function getColor(str) {
     if (str === 'unknown' || str === 'Unknown') {
@@ -1134,16 +1142,16 @@ function togglePanel() {
 // 年份选择器相关函数
 function createYearSelector() {
     const yearSelector = document.getElementById('yearSelector');
-    const currentYear = new Date().getFullYear();
+    yearSelector.innerHTML = '';
     
     console.log("Available years from data:", Array.from(availableYears));
     
-    // 生成2015-2025年的选项
-    for (let year = 2015; year <= 2025; year++) {
+    getSortedAvailableYears().forEach(year => {
         const yearStr = year.toString(); // 确保匹配字符串格式
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = `year-${yearStr}`;
+        checkbox.value = yearStr;
         checkbox.checked = true; // 默认全选
         checkbox.addEventListener('change', updateMapVisualization);
         
@@ -1157,20 +1165,14 @@ function createYearSelector() {
         wrapper.appendChild(label);
         
         yearSelector.appendChild(wrapper);
-    }
+    });
     
     console.log("Year selector created with", yearSelector.children.length, "options");
 }
 
 function getSelectedYears() {
-    const years = [];
-    for (let year = 2015; year <= 2025; year++) {
-        const yearStr = year.toString(); // 确保字符串格式
-        const checkbox = document.getElementById(`year-${yearStr}`);
-        if (checkbox && checkbox.checked) {
-            years.push(yearStr); // 返回字符串格式以匹配数据
-        }
-    }
+    const years = Array.from(document.querySelectorAll('#yearSelector input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value || checkbox.id.replace('year-', ''));
     console.log("选择的年份:", years);
     return years;
 }
@@ -1297,19 +1299,16 @@ let playbackInterval = null;
 const PLAYBACK_DELAY = 2000; // 2秒间隔
 
 function getAllYears() {
-    const years = [];
-    for (let year = 2015; year <= 2025; year++) {
-        years.push(year);
-    }
-    return years.sort((a, b) => a - b);
+    return getSortedAvailableYears();
 }
 
 function setYearSelection(targetYear) {
+    const selectedYear = Number(targetYear);
     // 首先取消所有年份的选择
-    for (let year = 2015; year <= 2025; year++) {
+    for (const year of getAllYears()) {
         const checkbox = document.getElementById(`year-${year}`);
         if (checkbox) {
-            checkbox.checked = year === targetYear;
+            checkbox.checked = year === selectedYear;
         }
     }
     // 更新地图显示
@@ -1335,6 +1334,10 @@ function startPlayback() {
     playButton.classList.add('playing');
     
     const years = getAllYears();
+    if (years.length === 0) {
+        stopPlayback();
+        return;
+    }
     let currentIndex = 0;
     
     // 立即显示第一个年份
