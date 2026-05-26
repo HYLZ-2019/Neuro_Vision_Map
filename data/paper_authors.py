@@ -4,6 +4,7 @@
 
 
 paper_authors = [
+    {'title': 'Generative Anonymization in Event Streams', 'authors': [['Adam T. Müller', 'Center for Machine Learning (ZML), Heilbronn University of Applied Sciences, Heilbronn, Germany'], ['Mihai Kocsis', 'Center for Machine Learning (ZML), Heilbronn University of Applied Sciences, Heilbronn, Germany'], ['Nicolaj C. Stache', 'Center for Machine Learning (ZML), Heilbronn University of Applied Sciences, Heilbronn, Germany']]},
     {'title': 'Validating DVS Application in Autonomous Driving with Various AEB Scenarios in CARLA Simulator', 'authors': [['Jingxiang Feng', ''], ['Peiran Zhao', ''], ['J. Konpang', ''], ['Adisorn Sirikham', ''], ['Haoran Zheng', ''], ['Phuri Kalnaowakul', ''], ['Jia Wang', '']]},
     {'title': 'Our machines need new eyes', 'authors': [['Greg W Schwartz', '']]},
     {'title': 'UREPtrack: single-branch PoolFormer for unified attention-free RGB-event visual object tracking', 'authors': [['Min Lu', '']]},
