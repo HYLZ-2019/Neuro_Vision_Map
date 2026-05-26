@@ -2,6 +2,7 @@
 
 
 institute_info = {
+	'Heilbronn University of Applied Sciences': {'lat': 49.123, 'lon': 9.2105, 'country': 'Germany'},
     'Georgia Institute of Technology': {'lat': 33.748752, 'lon': -84.38768449999999, 'country': 'USA'},
     'Columbia University': {'lat': 40.8075, 'lon': -73.9626, 'country': 'USA'},
     'Shenzhen Jiutian Ruixin Technology Co.': {'lat': 22.5431, 'lon': 114.0579, 'country': 'China'},
