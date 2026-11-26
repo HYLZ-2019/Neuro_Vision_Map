@@ -2,6 +2,7 @@
 
 
 paper_list = [
+    ['BMVC 2026', 'Simplified Cross-Modal Calibration for Heterogeneous Event-RGB Stereo Systems', 'c'],
     ['CVPRW 2026', 'Generative Anonymization in Event Streams', 'c'],
     ['NCE 2026', 'Line‑based Event Preprocessing: Towards Low‑Energy Neuromorphic Computer Vision', 'j'],
     ['TCDS 2026', 'Object Detection with Spiking Neural Networks on Event Videos for Driving Scenarios', 'j'],
